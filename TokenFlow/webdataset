@@ -1,0 +1,50 @@
+pip install webdataset
+import webdataset as wds
+import os
+
+存放
+# 设定你的MP4文件所在的目录
+video_directory = "./videos"
+# 输出的webdataset文件
+output_file = "videos.tar"
+
+# 创建一个TarWriter来写入数据
+sink = wds.TarWriter(output_file)
+
+# 遍历视频目录中的所有MP4文件
+for video_file in os.listdir(video_directory):
+    if video_file.endswith(".mp4"):
+        video_path = os.path.join(video_directory, video_file)
+        # 读取视频文件（这里假设你直接存储未经处理的视频）
+        with open(video_path, "rb") as f:
+            video_data = f.read()
+        # 写入到webdataset中，可以为每个视频文件设置一个唯一的key
+        sink.write({
+            "__key__": video_file,  # 使用文件名作为键，或者根据需要生成其他唯一键
+            "mp4": video_data,  # 将视频数据直接存储
+        })
+
+# 不要忘记关闭TarWriter
+sink.close()
+
+读取视频文件
+import webdataset as wds
+
+# 指定.webdataset格式文件的位置
+dataset_path = "videos.tar"
+
+# 创建数据集对象
+dataset = wds.WebDataset(dataset_path)
+
+# 遍历数据集中的每个样本
+for sample in dataset:
+    # 获取视频数据
+    video_data = sample["mp4"]
+    video_key = sample["__key__"]
+
+    # 将视频数据保存为MP4文件
+    output_video_path = f"{video_key}.mp4"
+    with open(output_video_path, "wb") as f:
+        f.write(video_data)
+
+    print(f"Video {output_video_path} has been saved.")
