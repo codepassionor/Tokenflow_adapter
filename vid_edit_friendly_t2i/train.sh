@@ -1,0 +1,1 @@
+export CUDA_VISIBLE_DEVICES=0; accelerate launch --num_processes=1 --num_machines=1 --gpu_ids=0 --num_cpu_threads_per_process 1  main.py --pretrained_model_name_or_path runwayml/stable-diffusion-v1-5  --rank 4 --train_batch_size 1 --mixed_precision no --dataset_src /home/shuyumo/research/t2v/data/MSRVTT

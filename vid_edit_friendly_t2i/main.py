@@ -15,7 +15,7 @@
 # limitations under the License.
 """Fine-tuning script for Stable Diffusion for text2image with support for LoRA."""
 import torchvision
-#from torchvision import transforms
+from torchvision import transforms
 import vid_edit_dataset
 import argparse
 import logging
@@ -30,6 +30,7 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 import torch.utils.checkpoint
+from torch.utils.data import DataLoader
 import transformers
 from accelerate import Accelerator
 from accelerate.logging import get_logger
@@ -98,9 +99,37 @@ These are LoRA adaption weights for {base_model}. The weights were fine-tuned on
 
     model_card.save(os.path.join(repo_folder, "README.md"))
 
-
 def parse_args():
     parser = argparse.ArgumentParser(description="Simple example of a training script.")
+    parser.add_argument(
+        "--dataset_src",
+        type=str,
+        default=None,
+        required=False,
+        help=(
+'''
+Path to dataset for train\n
+@see https://drive.google.com/drive/folders/1LYVUCPRxpKMRjCSfB_Gz-ugQa88FqDu_
+The .mp4 in MSRVTT_Video.zip should be unziped into a subfolder named `video`
+
+For example:
+
+(vid_edit_friendly) shuyumo@SYM:~/research/t2v/data/MSRVTT$ tree
+.
+├── MSRVTT_JSFUSION_test.csv
+├── MSRVTT_data.json
+├── MSRVTT_train.7k.csv
+├── MSRVTT_train.9k.csv
+└── video
+    ├── video0.mp4
+    ├── video1.mp4
+    ├── video10.mp4
+    ├── video100.mp4
+
+`dataset_src` shoule be set as "~/research/t2v/data/MSRVTT"
+@see: vid_edit_dataset.py
+''')
+    )
     parser.add_argument(
         "--pretrained_model_name_or_path",
         type=str,
@@ -382,6 +411,26 @@ def parse_args():
 
     return args
 
+def encode_prompt(prompt_batch, text_encoder, tokenizer):
+    with torch.no_grad():
+        text_inputs = tokenizer(
+            prompt_batch,
+            padding="max_length",
+            max_length=tokenizer.model_max_length,
+            truncation=True,
+            return_tensors="pt",
+        )
+        text_input_ids = text_inputs.input_ids
+        prompt_embeds = text_encoder(
+            text_input_ids.to(text_encoder.device),
+            output_hidden_states=True,
+        )
+    # print('qwq1', prompt_embeds[0].shape)
+    # print('qwq2', prompt_embeds[1].shape)
+    return prompt_embeds[0]
+
+
+
 
 DATASET_NAME_MAPPING = {
     "lambdalabs/pokemon-blip-captions": ("image", "text"),
@@ -545,8 +594,24 @@ def main():
         model = model._orig_mod if is_compiled_module(model) else model
         return model
 
+    # TODO: [SYM]:
+    # fingerprint used by the cache for the other processes to load the result
+    # details: https://github.com/huggingface/diffusers/pull/4038#discussion_r1266078401
+
     # DataLoaders creation:
-    train_dataset, train_dataloader = vid_edit_dataset.get_data_loader(args.train_batch_size)
+    # train_dataset, train_dataloader = vid_edit_dataset.get_data_loader(args.train_batch_size)
+    train_dataset = vid_edit_dataset.MSRVTTLocalDataset(
+        dataset_src=args.dataset_src,
+        train=True,
+        transformer=transforms.Compose([
+            transforms.Resize(args.resolution, interpolation=transforms.InterpolationMode.BILINEAR),
+            transforms.CenterCrop(args.resolution),
+            transforms.ToTensor(),
+            transforms.Normalize([0.5], [0.5]),
+        ])
+    )
+
+    train_dataloader = DataLoader(train_dataset, batch_size=args.train_batch_size, shuffle=True)
 
     # Scheduler and math around the number of training steps.
     overrode_max_train_steps = False
@@ -636,9 +701,21 @@ def main():
         unet.train()
         train_loss = 0.0
         for step, batch in enumerate(train_dataloader):
+            print(f'train by labeled data: step={step}, image = {batch[0].shape}, label = {batch[1]}')
             with accelerator.accumulate(unet):
-                noise, target, text = batch
-                latents = target
+                image, text = batch
+                text_embeddings  = encode_prompt(text, text_encoder, tokenizer)
+
+                print('text_embeddings ready: ', text_embeddings.shape)
+
+                latents = vae.encode(image).latent_dist.sample()
+                latents = latents * vae.config.scaling_factor
+
+                print('latents ready: ', latents.shape)
+
+                noise = torch.randn_like(latents)
+
+                print('noise ready: ', noise.shape)
 
                 if args.noise_offset:
                     # https://www.crosslabs.org//blog/diffusion-with-offset-noise
@@ -654,10 +731,11 @@ def main():
                 # Add noise to the latents according to the noise magnitude at each timestep
                 # (this is the forward diffusion process)
                 noisy_latents = noise_scheduler.add_noise(latents, noise, timesteps)
+                print('noisy_latents ready: ', noisy_latents.shape)
 
                 # Get the text embedding for conditioning
                 #encoder_hidden_states = text_encoder(batch["input_ids"], return_dict=False)[0]
-                encoder_hidden_states = text #FIXME
+                encoder_hidden_states = text_embeddings # FIXME
 
                 # Get the target for loss depending on the prediction type
                 if args.prediction_type is not None:
@@ -694,6 +772,8 @@ def main():
                     loss = loss.mean(dim=list(range(1, len(loss.shape)))) * mse_loss_weights
                     loss = loss.mean()
 
+                print('current loss = ', loss)
+
 
                 # ourloss
                 ourloss = 0.
@@ -705,6 +785,7 @@ def main():
 
                 # Backpropagate
                 accelerator.backward(loss)
+
                 if accelerator.sync_gradients:
                     params_to_clip = lora_layers
                     accelerator.clip_grad_norm_(params_to_clip, args.max_grad_norm)
@@ -770,6 +851,7 @@ def main():
                     f"Running validation... \n Generating {args.num_validation_images} images with prompt:"
                     f" {args.validation_prompt}."
                 )
+
                 # create pipeline
                 pipeline = DiffusionPipeline.from_pretrained(
                     args.pretrained_model_name_or_path,
