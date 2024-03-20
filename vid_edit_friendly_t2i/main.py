@@ -751,7 +751,7 @@ def main():
 
                 # Predict the noise residual and compute loss
                 model_pred = unet(noisy_latents, timesteps, encoder_hidden_states, return_dict=False)[0]
-
+                
                 # reconstruct_loss
                 if args.snr_gamma is None:
                     loss = F.mse_loss(model_pred.float(), target.float(), reduction="mean")
@@ -771,12 +771,15 @@ def main():
                     loss = F.mse_loss(model_pred.float(), target.float(), reduction="none")
                     loss = loss.mean(dim=list(range(1, len(loss.shape)))) * mse_loss_weights
                     loss = loss.mean()
-
                 print('current loss = ', loss)
-
-
-                # ourloss
-                ourloss = 0.
+                features = hook.get_features(input_data)
+                import torch.nn.functional as F
+                if len(features) > 1:
+                    cos_sim = F.cosine_similarity(features[0][:-1], features[0][1:], dim=1)
+                    our_loss = (1 - cos_sim).mean()
+                else:
+                    our_loss = 0
+                print('our_loss = ', our_loss)
                 loss += ourloss
 
                 # Gather the losses across all processes for logging (if we use distributed training).
@@ -933,7 +936,7 @@ def main():
 
             # load attention processors
             pipeline.load_lora_weights(args.output_dir)
-
+     
             # run inference
             generator = torch.Generator(device=accelerator.device)
             if args.seed is not None:
