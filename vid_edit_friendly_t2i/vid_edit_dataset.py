@@ -127,7 +127,7 @@ if __name__ == '__main__':
     # vae.to('cuda')
     # print('pretrained model loaded.')
     dataset = MSRVTTLocalDataset(
-        dataset_src="/home/shuyumo/research/t2v/data/MSRVTT",
+        dataset_src="Tokenflow_adapter/vid_edit_friendly_t2i/MSRVTT",
         train=True,
         transformer = transforms.Compose(
             [
