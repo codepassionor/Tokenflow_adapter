@@ -105,8 +105,9 @@ class MSRVTTLocalDataset(Dataset):
 
         # [SYM]: Only use the first sentance for a certain video.
         prompt = self.prompts[idx][0]
-
-        return (self.transformer(pil_image1),self.transformer(pil_image2)), prompt
+        stacked_images = torch.stack([transformed_image1, transformed_image2], dim=0)
+        
+        return stacked_images, prompt
 
 
 if __name__ == '__main__':
