@@ -90,19 +90,22 @@ class MSRVTTLocalDataset(Dataset):
         video = cv2.VideoCapture(video_src_path)
 
         # [SYM]: Only load the first frame for a certain video.
-        success, frame = video.read()
+        success, frame1 = video.read()
         if not success:
             raise RuntimeError(f"Can not load the frames of {video_src_path}")
-        frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        pil_image = Image.fromarray(frame_rgb)
+        success, frame2 = video.read()
+        if not success:
+            raise RuntimeError(f"Can not load the frames of {video_src_path}")
+        frame1_rgb = cv2.cvtColor(frame1, cv2.COLOR_BGR2RGB)
+        pil_image1 = Image.fromarray(frame_rgb1)
+        frame2_rgb = cv2.cvtColor(frame2, cv2.COLOR_BGR2RGB)
+        pil_image2 = Image.fromarray(frame_rgb2)
         video.release()
 
         # [SYM]: Only use the first sentance for a certain video.
         prompt = self.prompts[idx][0]
 
-        return self.transformer(pil_image), prompt
-
-
+        return (self.transformer(pil_image1),self.transformer(pil_image2)), prompt
 
 
 if __name__ == '__main__':
