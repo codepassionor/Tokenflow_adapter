@@ -712,16 +712,13 @@ def main():
             with accelerator.accumulate(unet):
                 image, text = batch
                 text_embeddings  = encode_prompt(text, text_encoder, tokenizer)
-
                 print('text_embeddings ready: ', text_embeddings.shape)
 
                 latents = vae.encode(image).latent_dist.sample()
                 latents = latents * vae.config.scaling_factor
-
+                
                 print('latents ready: ', latents.shape)
-
                 noise = torch.randn_like(latents)
-
                 print('noise ready: ', noise.shape)
 
                 if args.noise_offset:
@@ -778,19 +775,7 @@ def main():
                     loss = F.mse_loss(model_pred.float(), target.float(), reduction="none")
                     loss = loss.mean(dim=list(range(1, len(loss.shape)))) * mse_loss_weights
                     loss = loss.mean()
-                import torch
-                import torch.nn.functional as F
-                    
-                def batch_cosine_sim(x, y):
-                    if type(x) is list:
-                        x = torch.cat(x, dim=0)
-                    if type(y) is list:
-                        y = torch.cat(y, dim=0)
-                    x = x / x.norm(dim=-1, keepdim=True)
-                    y = y / y.norm(dim=-1, keepdim=True)
-                    similarity = x @ y.T
-                    return similarity
-                    
+                  
                 if len(features) > 1
                     half = len(features[0]) // 2
                     features_t = features[0][:half]
