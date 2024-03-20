@@ -43,7 +43,8 @@ def get_data_loader(batch_size):
     num_samples = 1000  # total number of samples in the dataset
     dataset = RandomImageDataset(num_samples)
 
-    # Create a DataLoader to batch the data
+    # Create a DataLoader
+ to batch the data
     dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
     return dataset, dataloader
 '''
@@ -140,7 +141,7 @@ if __name__ == '__main__':
     # print('dateset built')
     dataloader = DataLoader(dataset, batch_size=4, shuffle=True)
     # # dataset, dataloader = get_data_loader(4)
-    for image, text in dataloader:
-        print(image.shape)
+    for images, text in dataloader:
+        print(images[0].shape,images[1].shape)
         print(text)
 
