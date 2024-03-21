@@ -777,22 +777,26 @@ def main():
                     loss = F.mse_loss(model_pred.float(), target.float(), reduction="none")
                     loss = loss.mean(dim=list(range(1, len(loss.shape)))) * mse_loss_weights
                     loss = loss.mean()
-                features = hook.get_
+                features = hook.get_features()
                 if len(features) > 1
-                    half = len(features[0]) // 2
-                    features_t = features[0][:half]
-                    features_t_minus_1 = features[0][half:]
-                    features_t = features_t.squeeze(0)
-                    features_t_minus_1 = features_t_minus_1.squeeze(0)
-                    cos_sim_t = batch_cosine_sim(features_t[:-1], features_t[1:])
-                    cos_sim_t_minus_1 = batch_cosine_sim(features_t_minus_1[:-1], features_t_minus_1[1:])
+                    xs = len(features[0]) // 4
+                    features_rst_t = features[0][:xs]
+                    features_sec_t = features[0][xs: 2 * xs]
+                    features_rst_t = features_rst_t.squeeze(0)
+                    features_sec_t = features_sec_t.squeeze(0)
+                    features_rst_t_plus_1 = features[0][2 * xs : 3 * xs]
+                    features_sec_t_plus_1 = features[0][3 * xs : 4 * xs]
+                    features_rst_t_plus_1 = features_rst_t_plus_1.squeeze(0)
+                    features_sec_t_plus_1 = features_sec_t_plus_1.squeeze(0)
+                    cos_sim_t = batch_cosine_sim(features_rst_t, features_sec_t)
+                    cos_sim_t_plus_1 = batch_cosine_sim(features_rst_t_plus_1, features_sec_t_plus_1)
                     cos_sim_diff = torch.abs(cos_sim_t - cos_sim_t_minus_1).mean()
                     our_loss = cos_sim_diff
                 else:
                     our_loss = 0
                     print('our_loss = ', our_loss)
                 loss += our_loss
-
+                hook.reset()
 
                 # Gather the losses across all processes for logging (if we use distributed training).
                 avg_loss = accelerator.gather(loss.repeat(args.train_batch_size)).mean()
@@ -807,7 +811,6 @@ def main():
                 optimizer.step()
                 lr_scheduler.step()
                 optimizer.zero_grad()
-                hook.reset()
 
             # Checks if the accelerator has performed an optimization step behind the scenes
             if accelerator.sync_gradients:
