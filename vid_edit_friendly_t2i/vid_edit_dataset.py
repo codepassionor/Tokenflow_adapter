@@ -97,10 +97,20 @@ class MSRVTTLocalDataset(Dataset):
         success, frame2 = video.read()
         if not success:
             raise RuntimeError(f"Can not load the frames of {video_src_path}")
+        success, frame3 = video.read()
+        if not success:
+            raise RuntimeError(f"Can not load the frames of {video_src_path}")
+        success, frame4 = video.read()
+        if not success:
+            raise RuntimeError(f"Can not load the frames of {video_src_path}")
         frame1_rgb = cv2.cvtColor(frame1, cv2.COLOR_BGR2RGB)
-        pil_image1 = Image.fromarray(frame_rgb1)
+        pil_image1 = Image.fromarray(frame1_rgb)
         frame2_rgb = cv2.cvtColor(frame2, cv2.COLOR_BGR2RGB)
-        pil_image2 = Image.fromarray(frame_rgb2)
+        pil_image2 = Image.fromarray(frame2_rgb)
+        frame3_rgb = cv2.cvtColor(frame3, cv2.COLOR_BGR2RGB)
+        pil_image3 = Image.fromarray(frame3_rgb2)
+        frame4_rgb = cv2.cvtColor(frame4, cv2.COLOR_BGR2RGB)
+        pil_image4 = Image.fromarray(frame4_rgb2)
         video.release()
 
         # [SYM]: Only use the first sentance for a certain video.
