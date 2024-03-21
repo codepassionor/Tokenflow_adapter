@@ -729,7 +729,9 @@ def main():
 
                 bsz = latents.shape[0]
                 # Sample a random timestep for each image
-                timesteps = torch.randint(0, noise_scheduler.config.num_train_timesteps, (bsz,), device=latents.device)
+                # timesteps = torch.randint(0, noise_scheduler.config.num_train_timesteps, (bsz//2,), device=latents.device)
+                timesteps = torch.tensor([2, 3], device=latents.device)
+                timesteps = timesteps.repeat(2)
                 timesteps = timesteps.long()
 
                 # Add noise to the latents according to the noise magnitude at each timestep
@@ -775,7 +777,7 @@ def main():
                     loss = F.mse_loss(model_pred.float(), target.float(), reduction="none")
                     loss = loss.mean(dim=list(range(1, len(loss.shape)))) * mse_loss_weights
                     loss = loss.mean()
-                  
+                features = hook.get_
                 if len(features) > 1
                     half = len(features[0]) // 2
                     features_t = features[0][:half]
