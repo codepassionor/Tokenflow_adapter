@@ -778,7 +778,7 @@ def main():
                     loss = loss.mean(dim=list(range(1, len(loss.shape)))) * mse_loss_weights
                     loss = loss.mean()
                 features = hook.get_features()
-                if len(features) > 1
+                if len(features) > 1:
                     xs = len(features[0]) // 4
                     features_rst_t = features[0][:xs]
                     features_sec_t = features[0][xs: 2 * xs]
