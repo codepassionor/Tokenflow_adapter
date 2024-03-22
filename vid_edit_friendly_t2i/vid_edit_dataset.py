@@ -108,9 +108,9 @@ class MSRVTTLocalDataset(Dataset):
         frame2_rgb = cv2.cvtColor(frame2, cv2.COLOR_BGR2RGB)
         pil_image2 = Image.fromarray(frame2_rgb)
         frame3_rgb = cv2.cvtColor(frame3, cv2.COLOR_BGR2RGB)
-        pil_image3 = Image.fromarray(frame3_rgb2)
+        pil_image3 = Image.fromarray(frame3_rgb)
         frame4_rgb = cv2.cvtColor(frame4, cv2.COLOR_BGR2RGB)
-        pil_image4 = Image.fromarray(frame4_rgb2)
+        pil_image4 = Image.fromarray(frame4_rgb)
         video.release()
 
         # [SYM]: Only use the first sentance for a certain video.
