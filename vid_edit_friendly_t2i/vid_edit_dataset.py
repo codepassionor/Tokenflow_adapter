@@ -11,7 +11,6 @@ from tqdm import tqdm
 from torchvision import transforms
 from PIL import Image
 import webdataset as wds
-import preprocess
 '''
 #[SYM]: different API with `MSRVTTLocalDataset`.
 
@@ -55,7 +54,7 @@ class MSRVTTLocalDataset(Dataset):
         self.train = train
         self.dataset_src = dataset_src
         self.transformer = transformer
-
+        from preprocess import 
         data_info_src = os.path.join(dataset_src, 'MSRVTT_data.json')
         with open(data_info_src, 'r') as f:
             data_info = json.loads(f.read())
