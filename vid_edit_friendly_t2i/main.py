@@ -777,24 +777,24 @@ def main():
                     loss = loss.mean(dim=list(range(1, len(loss.shape)))) * mse_loss_weights
                     loss = loss.mean()
                 features = hook.get_features()
-                if len(features) > 1:
-                    xs = len(features[0]) // 4
-                    features_rst_t = features[0][:xs]
-                    features_sec_t = features[0][xs: 2 * xs]
-                    features_rst_t = features_rst_t.squeeze(0)
-                    features_sec_t = features_sec_t.squeeze(0)
-                    features_rst_t_plus_1 = features[0][2 * xs : 3 * xs]
-                    features_sec_t_plus_1 = features[0][3 * xs : 4 * xs]
-                    features_rst_t_plus_1 = features_rst_t_plus_1.squeeze(0)
-                    features_sec_t_plus_1 = features_sec_t_plus_1.squeeze(0)
-                    cos_sim_t = batch_cosine_sim(features_rst_t, features_rst_t_plus_1)
-                    cos_sim_t_plus_1 = batch_cosine_sim(features_sec_t, features_sec_t_plus_1)
-                    cos_sim_diff = torch.abs(cos_sim_t - cos_sim_t_minus_1).mean()
-                    our_loss = cos_sim_diff
+                for feature in features : 
+                   f1_t1 = feature[0::4] # b//4 c h w
+                   f2_t1 = feature[1::4] 
+                   f1_t2 = feature[2::4] 
+                   f2_t2 = feature[3::4]
+                   b,c,h,w = f1_t1.shape
+                   tmp1 = torch.permute(f1_t1, (0, 2, 3, 1)).reshape(-1, c)
+                   tmp2 = torch.permute(f2_t1, (0, 2, 3, 1)).reshape(-1, c)
+                   tmp3 = torch.permute(f1_t2, (0, 2, 3, 1)).reshape(-1, c)
+                   tmp4 = torch.permute(f2_t2, (0, 2, 3, 1)).reshape(-1, c)
+                   sim_12 = cos(tmp1, tmp2) 
+                   sim_34 = cos(tmp3, tmp4)
+                   loss += ((sim_12 - sim_34) ** 2).mean()
                 else:
                     our_loss = 0
                     print('our_loss = ', our_loss)
                 loss += our_loss
+                print('loss = ', loss)
                 hook.reset()
 
                 # Gather the losses across all processes for logging (if we use distributed training).
