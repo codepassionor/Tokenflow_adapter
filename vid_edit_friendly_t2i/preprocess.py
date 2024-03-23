@@ -27,3 +27,4 @@ for tar_index in tqdm(range(num_tars), desc="Creating TAR files"):
                     "mp4": video_file.read()
                 }
                 writer.write(sample)
+writer.close()
