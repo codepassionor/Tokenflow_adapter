@@ -7,9 +7,9 @@ def video2webdataset(src_path="Tokenflow_adapter/vid_edit_friendly_t2i/MSRVTT/Vi
     video_folder_path = Path(src_path)
     output_path = Path(output_path)
     
-    max_videos_per_tar = 100  # 可以根据需要调整这个数值
+    max_videos_per_tar = 100  # sometimes we may need to change
     
-    # 获取所有的视频文件名
+    # get all the video names
     video_filenames = [f for f in os.listdir(video_folder_path) if f.endswith(".mp4")]
     num_tars = len(video_filenames) // max_videos_per_tar + (1 if len(video_filenames) % max_videos_per_tar > 0 else 0)
     
@@ -20,7 +20,7 @@ def video2webdataset(src_path="Tokenflow_adapter/vid_edit_friendly_t2i/MSRVTT/Vi
         
         tar_name = f"dataset_{tar_index:04d}.tar"
         
-        # 注意使用output_path作为TAR文件的保存位置
+        # use output_path as the position where the tar stores
         with wds.TarWriter(str(output_path / tar_name)) as writer:
             for video_filename in tar_video_filenames:
                 video_path = video_folder_path / video_filename
