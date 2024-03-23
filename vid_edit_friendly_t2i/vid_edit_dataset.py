@@ -97,12 +97,6 @@ class MSRVTTLocalDataset(Dataset):
         success, frame2 = video.read()
         if not success:
             raise RuntimeError(f"Can not load the frames of {video_src_path}")
-        success, frame3 = video.read()
-        if not success:
-            raise RuntimeError(f"Can not load the frames of {video_src_path}")
-        success, frame4 = video.read()
-        if not success:
-            raise RuntimeError(f"Can not load the frames of {video_src_path}")
         frame1_rgb = cv2.cvtColor(frame1, cv2.COLOR_BGR2RGB)
         pil_image1 = Image.fromarray(frame1_rgb)
         frame2_rgb = cv2.cvtColor(frame2, cv2.COLOR_BGR2RGB)
