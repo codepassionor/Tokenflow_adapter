@@ -24,7 +24,7 @@ import os
 import random
 import shutil
 from pathlib import Path
-
+import preprocess
 import datasets
 import numpy as np
 import torch
@@ -445,6 +445,7 @@ DATASET_NAME_MAPPING = {
 
 
 def main():
+    Video2webdatset()
     args = parse_args()
     if args.report_to == "wandb" and args.hub_token is not None:
         raise ValueError(
