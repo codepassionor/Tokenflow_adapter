@@ -50,11 +50,10 @@ def get_data_loader(batch_size):
 '''
 
 class MSRVTTLocalDataset(Dataset):
-    def __init__(self, dataset_src: str, train: bool, transformer, video_subfolder='video'):
+    def __init__(self, dataset_src: str, train: bool, transformer, video_subfolder='webdatset'):
         self.train = train
         self.dataset_src = dataset_src
         self.transformer = transformer
-        from preprocess import 
         data_info_src = os.path.join(dataset_src, 'MSRVTT_data.json')
         with open(data_info_src, 'r') as f:
             data_info = json.loads(f.read())
