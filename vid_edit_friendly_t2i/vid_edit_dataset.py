@@ -89,7 +89,6 @@ class MSRVTTLocalDataset(Dataset):
     def __getitem__(self, idx):
         video_src_path = self.dataset_src[idx]
         video = cv2.VideoCapture(video_src_path)
-
         # [SYM]: Only load the first frame for a certain video.
         success, frame1 = video.read()
         if not success:
@@ -102,13 +101,11 @@ class MSRVTTLocalDataset(Dataset):
         frame2_rgb = cv2.cvtColor(frame2, cv2.COLOR_BGR2RGB)
         pil_image2 = Image.fromarray(frame2_rgb)
         video.release()
-
         # [SYM]: Only use the first sentance for a certain video.
         prompt = self.prompts[idx][0]
-        tensor_image1 = ToTensor()(pil_image1)
-        tensor_image2 = ToTensor()(pil_image2)
+        tensor_image1 = self.transformer(pil_image1)
+        tensor_image2 = self.transformer(pil_image2)
         stacked_images = torch.concatenate([tensor_image1,tensor_image2,tensor_image1,tensor_image2], dim=0)
-
         return stacked_images, prompt
 
 
