@@ -110,8 +110,8 @@ class MSRVTTLocalDataset(Dataset):
         return stacked_images, prompt
 
 
-# if __name__ == '__main__':
-#     pass
+if __name__ == '__main__':
+    # pass
     # print('start')
     # tokenizer = CLIPTokenizer.from_pretrained(
     #     'runwayml/stable-diffusion-v1-5',
@@ -128,22 +128,22 @@ class MSRVTTLocalDataset(Dataset):
     # vae.to('cuda')
     # print('pretrained model loaded.')
 
-    # dataset = MSRVTTLocalDataset(
-    #     dataset_src="Tokenflow_adapter/vid_edit_friendly_t2i/MSRVTT",
-    #     train=True,
-    #     transformer = transforms.Compose(
-    #         [
-    #             transforms.Resize(512, interpolation=transforms.InterpolationMode.BILINEAR),
-    #             transforms.CenterCrop(512),
-    #             transforms.ToTensor(),
-    #             transforms.Normalize([0.5], [0.5]),
-    #         ]
-    #     )
-    # )
-    # # print('dateset built')
-    # dataloader = DataLoader(dataset, batch_size=4, shuffle=True)
-    # # # dataset, dataloader = get_data_loader(4)
-    # for images, text in dataloader:
-    #     print(images[0].shape,images[1].shape)
-    #     print(text)
+    dataset = MSRVTTLocalDataset(
+        dataset_src="Tokenflow_adapter/vid_edit_friendly_t2i/MSRVTT",
+        train=True,
+        transformer = transforms.Compose(
+            [
+                transforms.Resize(512, interpolation=transforms.InterpolationMode.BILINEAR),
+                transforms.CenterCrop(512),
+                transforms.ToTensor(),
+                transforms.Normalize([0.5], [0.5]),
+            ]
+        )
+    )
+    # print('dateset built')
+    dataloader = DataLoader(dataset, batch_size=4, shuffle=True)
+    # # dataset, dataloader = get_data_loader(4)
+    for images, text in dataloader:
+        print(images[0].shape,images[1].shape)
+        print(text)
 
