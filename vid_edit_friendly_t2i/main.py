@@ -729,8 +729,7 @@ def main():
 
                 bsz = latents.shape[0]
                 # Sample a random timestep for each image
-                # timesteps = torch.randint(0, noise_scheduler.config.num_train_timesteps, (bsz//2,), device=latents.device)
-                timesteps = torch.tensor([2, 3], device=latents.device)
+                timesteps = torch.randint(0, noise_scheduler.config.num_train_timesteps, (bsz//2,), device=latents.device)
                 timesteps = timesteps.repeat(2)
                 timesteps = timesteps.long()
 
