@@ -787,8 +787,8 @@ def main():
                     features_sec_t_plus_1 = features[0][3 * xs : 4 * xs]
                     features_rst_t_plus_1 = features_rst_t_plus_1.squeeze(0)
                     features_sec_t_plus_1 = features_sec_t_plus_1.squeeze(0)
-                    cos_sim_t = batch_cosine_sim(features_rst_t, features_sec_t)
-                    cos_sim_t_plus_1 = batch_cosine_sim(features_rst_t_plus_1, features_sec_t_plus_1)
+                    cos_sim_t = batch_cosine_sim(features_rst_t, features_rst_t_plus_1)
+                    cos_sim_t_plus_1 = batch_cosine_sim(features_sec_t, features_sec_t_plus_1)
                     cos_sim_diff = torch.abs(cos_sim_t - cos_sim_t_minus_1).mean()
                     our_loss = cos_sim_diff
                 else:
