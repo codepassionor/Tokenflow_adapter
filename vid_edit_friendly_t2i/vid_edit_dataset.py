@@ -104,6 +104,8 @@ class MSRVTTLocalDataset(Dataset):
         prompt = self.prompts[idx][0]
         tensor_image1 = self.transformer(pil_image1)
         tensor_image2 = self.transformer(pil_image2)
+        tensor_image1 = tensor_image1.unsqueeze(0)
+        tensor_image2 = tensor_image2.unsqueeze(0)
         stacked_images = torch.concatenate([tensor_image1,tensor_image2,tensor_image1,tensor_image2], dim=0)
         return stacked_images, prompt
 
