@@ -50,7 +50,7 @@ def get_data_loader(batch_size):
 '''
 
 class MSRVTTLocalDataset(Dataset):
-    def __init__(self, dataset_src: str, train: bool, transformer, video_subfolder='webdatset'):
+    def __init__(self, dataset_src: str, train: bool, transformer, video_subfolder='video'):
         self.train = train
         self.dataset_src = dataset_src
         self.transformer = transformer
