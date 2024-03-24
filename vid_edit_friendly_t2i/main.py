@@ -51,15 +51,6 @@ from diffusers.utils import check_min_version, convert_state_dict_to_diffusers, 
 from diffusers.utils.hub_utils import load_or_create_model_card, populate_model_card
 from diffusers.utils.import_utils import is_xformers_available
 from diffusers.utils.torch_utils import is_compiled_module
-def batch_cosine_sim(x, y):
-  if type(x) is list:
-   x = torch.cat(x, dim=0)
-  if type(y) is list:
-   y = torch.cat(y, dim=0)
-  x = x / x.norm(dim=-1, keepdim=True)
-  y = y / y.norm(dim=-1, keepdim=True)
-  similarity = x @ y.T
-  return similarity
 # Will error if the minimal version of diffusers is not installed. Remove at your own risks.
 check_min_version("0.27.0.dev0")
 
