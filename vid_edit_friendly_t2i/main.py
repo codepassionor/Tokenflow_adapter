@@ -731,7 +731,7 @@ def main():
                 bsz = latents.shape[0]
                 # Sample a random timestep for each image
                 timesteps = torch.randint(0, noise_scheduler.config.num_train_timesteps, (bsz//2,), device=latents.device).reshape(-1, 1)
-                timestep = torch.concatenate([timestep, timestep], dim=1).reshape(-1)
+                timesteps = torch.concatenate([timestep, timestep], dim=1).reshape(-1)
                 timesteps = timesteps.long()
 
                 # Add noise to the latents according to the noise magnitude at each timestep
