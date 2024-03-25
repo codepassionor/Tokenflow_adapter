@@ -436,7 +436,7 @@ DATASET_NAME_MAPPING = {
 
 
 def main():
-    Video2webdatset()
+    # Video2webdatset()
     args = parse_args()
     if args.report_to == "wandb" and args.hub_token is not None:
         raise ValueError(
