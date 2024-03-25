@@ -768,23 +768,27 @@ def main():
                     loss = F.mse_loss(model_pred.float(), target.float(), reduction="none")
                     loss = loss.mean(dim=list(range(1, len(loss.shape)))) * mse_loss_weights
                     loss = loss.mean()
-                features = hook.get_features() #(4, 32, 64, 64)
+                features = hook.get_features() #(2, 32 * 4, 64, 64)
                 # features = [torch.randn((4, 32, 64, 64)), torch.randn((4, 64, 32, 32))]
                 cos = torch.nn.CosineSimilarity(dim=1, eps=1e-6)
-                f1_t1 = feature[0::4] # b//4 c h w
-                f2_t1 = feature[1::4] 
-                f1_t2 = feature[2::4] 
-                f2_t2 = feature[3::4]
-                b,c,h,w = f1_t1.shape
-                tmp1 = torch.permute(f1_t1, (0, 2, 3, 1)).reshape(-1, c)
-                tmp2 = torch.permute(f2_t1, (0, 2, 3, 1)).reshape(-1, c)
-                tmp3 = torch.permute(f1_t2, (0, 2, 3, 1)).reshape(-1, c)
-                tmp4 = torch.permute(f2_t2, (0, 2, 3, 1)).reshape(-1, c)
-                sim_12 = cos(tmp1, tmp2) 
-                sim_34 = cos(tmp3, tmp4)
-                our_loss = ((sim_12 - sim_34) ** 2).mean()
-                print('our_loss = ', our_loss)
-                loss += our_loss
+                for feature in features: #(32 * 4, 64, 64)
+                    split_features = torch.chunk(feature, 4, dim=0) #(4 * (32, 64, 64))
+                    f1_t1 = split_features[0]
+                    f2_t1 = split_features[1] # b//4 c h w
+                    f2_t2 = split_features[2]
+                    f1_t2 = split_features[3] 
+                    def reshape_and_permute(f):
+                        c, h, w = f.shape
+                        return f.permute(1, 2, 0).reshape(-1, c)
+                    tmp1 = reshape_and_permute(f1_t1)
+                    tmp2 = reshape_and_permute(f2_t1)
+                    tmp3 = reshape_and_permute(f1_t2)
+                    tmp4 = reshape_and_permute(f2_t2)
+                    sim_12 = cos(tmp1, tmp2) 
+                    sim_34 = cos(tmp3, tmp4)
+                    our_loss = ((sim_12 - sim_34) ** 2).mean()
+                    print('our_loss = ', our_loss)
+                    loss += our_loss
                 print('loss = ', loss)
                 # hook.reset()
 
