@@ -49,6 +49,8 @@ def get_data_loader(batch_size):
     return dataset, dataloader
 '''
 
+'''
+# [SYM]: no longer use. use webdataset for msrvtt.
 class MSRVTTLocalDataset(Dataset):
     def __init__(self, dataset_src: str, train: bool, transformer, video_subfolder='video'):
         self.train = train
@@ -108,7 +110,17 @@ class MSRVTTLocalDataset(Dataset):
         tensor_image2 = tensor_image2
         stacked_images = torch.concatenate([tensor_image1,tensor_image2,tensor_image1,tensor_image2], dim=0)
         return stacked_images, prompt
+'''
 
+def create_msrvtt_webdataset(webdata_src: str):
+    from io import BytesIO
+    return wds.WebDataset(webdata_src).shuffle(256).decode(
+        wds.handle_extension("input.ppm", transforms.Compose([
+            lambda x : Image.open(BytesIO(x)),
+            transforms.ToTensor()
+        ])),
+        # Only use the first sentence
+    ).to_tuple("input.ppm", "text.pyd", "noise.pyd").map_tuple(None, lambda x : x[0], None) # only use the first sentence.
 
 if __name__ == '__main__':
     # pass
@@ -128,22 +140,32 @@ if __name__ == '__main__':
     # vae.to('cuda')
     # print('pretrained model loaded.')
 
-    dataset = MSRVTTLocalDataset(
-        dataset_src="Tokenflow_adapter/vid_edit_friendly_t2i/MSRVTT",
-        train=True,
-        transformer = transforms.Compose(
-            [
-                transforms.Resize(512, interpolation=transforms.InterpolationMode.BILINEAR),
-                transforms.CenterCrop(512),
-                transforms.ToTensor(),
-                transforms.Normalize([0.5], [0.5]),
-            ]
-        )
-    )
-    # print('dateset built')
-    dataloader = DataLoader(dataset, batch_size=4, shuffle=True)
-    # # dataset, dataloader = get_data_loader(4)
-    for images, text in dataloader:
-        print(images[0].shape,images[1].shape)
-        print(text)
+    # dataset = MSRVTTLocalDataset(
+    #     dataset_src="Tokenflow_adapter/vid_edit_friendly_t2i/MSRVTT",
+    #     train=True,
+    #     transformer = transforms.Compose(
+    #         [
+    #             transforms.Resize(512, interpolation=transforms.InterpolationMode.BILINEAR),
+    #             transforms.CenterCrop(512),
+    #             transforms.ToTensor(),
+    #             transforms.Normalize([0.5], [0.5]),
+    #         ]
+    #     )
+    # )
+    # # print('dateset built')
+    # dataloader = DataLoader(dataset, batch_size=4, shuffle=True)
+    # # # dataset, dataloader = get_data_loader(4)
+    # for images, text in dataloader:
+    #     print(images[0].shape,images[1].shape)
+    #     print(text)
+    train_dataset = create_msrvtt_webdataset('/root/autodl-tmp/data/msrvtt.tar')
+    train_dataloader = DataLoader(train_dataset, batch_size=2, num_workers=2)
 
+
+    for i, sample in enumerate(train_dataloader):
+        print(type(sample), len(sample), type(sample[0]), sample[0].shape,  type(sample[1]), sample[1],  type(sample[2]))
+
+        if(i > 5): break
+        # count += 1
+
+    # print(count)

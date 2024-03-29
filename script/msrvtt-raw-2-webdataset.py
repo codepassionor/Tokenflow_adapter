@@ -5,10 +5,47 @@ import json
 from PIL import Image
 import torch
 from tqdm import tqdm
+from transformers import CLIPTextModel, CLIPTokenizer
 
-raw_msrvtt_src = '/root/autodl-tmp/MSRVTT'
-sink = wds.TarWriter("msrvtt.tar"),
+raw_msrvtt_src = '/root/autodl-tmp/data/MSRVTT'
+sink = wds.TarWriter("/root/autodl-tmp/data/msrvtt-webdataset.tar")
 video_subfolder = 'video'
+
+
+def encode_prompt(prompt_batch, text_encoder, tokenizer):
+    with torch.no_grad():
+        text_inputs = tokenizer(
+            prompt_batch,
+            padding="max_length",
+            max_length=tokenizer.model_max_length,
+            truncation=True,
+            return_tensors="pt",
+        )
+        text_input_ids = text_inputs.input_ids
+        prompt_embeds = text_encoder(
+            text_input_ids.to(text_encoder.device),
+            output_hidden_states=True,
+        )
+    # print('qwq1', prompt_embeds[0].shape)
+    # print('qwq2', prompt_embeds[1].shape)
+    return prompt_embeds[0]
+
+pretrained_model_name_or_path = 'runwayml/stable-diffusion-v1-5'
+
+tokenizer = CLIPTokenizer.from_pretrained(
+    pretrained_model_name_or_path, subfolder="tokenizer",
+    revision=None, cache_dir='/root/autodl-tmp/cache'
+)
+text_encoder = CLIPTextModel.from_pretrained(
+    pretrained_model_name_or_path, subfolder="text_encoder",
+    revision=None, cache_dir='/root/autodl-tmp/cache'
+)
+text_encoder.to('cuda')
+def wapper_encode_prompt(text):
+    return encode_prompt(text, text_encoder, tokenizer)
+
+
+_temp_test_ret = wapper_encode_prompt(('qaq', 'qwq', 'qaq is good.', 'qwq'))
 
 data_info_src = os.path.join(raw_msrvtt_src, 'MSRVTT_data.json')
 with open(data_info_src, 'r') as f:
@@ -53,14 +90,21 @@ for video_id in total_dataset_src:
 
 
     torch.manual_seed(hash(video_id))
-    noise = torch.randn(3, height, width)
+    noise0 = torch.randn(3, height, width)
+    noise1 = torch.randn(3, height, width)
+    noise = torch.cat((noise0, noise1, noise0, noise1), dim=2)
+
+    if(video_id[-1] == '0'): print(noise.shape)
 
     text = prompts[video_id]
+
+    # have to use ternsor to represent the text, which is only allowed by accelerator.
+    text = wapper_encode_prompt(text)
 
     sink.write({
         "__key__": video_id,
         "input.ppm": final_image,
-        "text.json": text,
+        "text.pyd": text,
         "noise.pyd": noise,
     })
 

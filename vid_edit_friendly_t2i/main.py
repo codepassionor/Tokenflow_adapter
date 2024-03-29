@@ -16,7 +16,8 @@
 """Fine-tuning script for Stable Diffusion for text2image with support for LoRA."""
 import torchvision
 from torchvision import transforms
-import vid_edit_dataset
+import webdataset as wds
+from vid_edit_dataset import create_msrvtt_webdataset
 import argparse
 import logging
 import math
@@ -55,7 +56,6 @@ from diffusers.utils.torch_utils import is_compiled_module
 check_min_version("0.27.0.dev0")
 
 logger = get_logger(__name__, log_level="INFO")
-
 
 def save_model_card(
     repo_id: str,
@@ -103,30 +103,8 @@ def parse_args():
         "--dataset_src",
         type=str,
         default=None,
-        required=False,
-        help=(
-'''
-Path to dataset for train\n
-@see https://drive.google.com/drive/folders/1LYVUCPRxpKMRjCSfB_Gz-ugQa88FqDu_
-The .mp4 in MSRVTT_Video.zip should be unziped into a subfolder named `video`
-
-For example:
-
-(vid_edit_friendly) shuyumo@SYM:~/research/t2v/data/MSRVTT$ tree
-.
-├── MSRVTT_JSFUSION_test.csv
-├── MSRVTT_data.json
-├── MSRVTT_train.7k.csv
-├── MSRVTT_train.9k.csv
-└── video
-    ├── video0.mp4
-    ├── video1.mp4
-    ├── video10.mp4
-    ├── video100.mp4
-
-`dataset_src` shoule be set as "~/research/t2v/data/MSRVTT"
-@see: vid_edit_dataset.py
-''')
+        required=True,
+        help=("File of `.tar` which is webdataset file. e.g.:/root/autodl-tmp/data/msrvtt.tar")
     )
     parser.add_argument(
         "--pretrained_model_name_or_path",
@@ -134,6 +112,20 @@ For example:
         default=None,
         required=True,
         help="Path to pretrained model or model identifier from huggingface.co/models.",
+    )
+    parser.add_argument(
+        "--cache_dir",
+        type=str,
+        default=None,
+        required=True,
+        help="Path to cache pretrained model (must with large amount of free space)",
+    )
+    parser.add_argument(
+        "--train_dataset_size",
+        type=int,
+        default=None,
+        required=True,
+        help="Size of `dataset_src` dataset.",
     )
     parser.add_argument(
         "--revision",
@@ -215,12 +207,6 @@ For example:
         type=str,
         default="sd-model-finetuned-lora",
         help="The output directory where the model predictions and checkpoints will be written.",
-    )
-    parser.add_argument(
-        "--cache_dir",
-        type=str,
-        default=None,
-        help="The directory where the downloaded models and datasets will be stored.",
     )
     parser.add_argument("--seed", type=int, default=None, help="A seed for reproducible training.")
     parser.add_argument(
@@ -490,18 +476,24 @@ def main():
                 repo_id=args.hub_model_id or Path(args.output_dir).name, exist_ok=True, token=args.hub_token
             ).repo_id
     # Load scheduler, tokenizer and models.
-    noise_scheduler = DDPMScheduler.from_pretrained(args.pretrained_model_name_or_path, subfolder="scheduler")
+    noise_scheduler = DDPMScheduler.from_pretrained(
+        args.pretrained_model_name_or_path, subfolder="scheduler", cache_dir=args.cache_dir
+    )
     tokenizer = CLIPTokenizer.from_pretrained(
-        args.pretrained_model_name_or_path, subfolder="tokenizer", revision=args.revision
+        args.pretrained_model_name_or_path, subfolder="tokenizer",
+        revision=args.revision, cache_dir=args.cache_dir
     )
     text_encoder = CLIPTextModel.from_pretrained(
-        args.pretrained_model_name_or_path, subfolder="text_encoder", revision=args.revision
+        args.pretrained_model_name_or_path, subfolder="text_encoder",
+        revision=args.revision, cache_dir=args.cache_dir
     )
     vae = AutoencoderKL.from_pretrained(
-        args.pretrained_model_name_or_path, subfolder="vae", revision=args.revision, variant=args.variant
+        args.pretrained_model_name_or_path, subfolder="vae",
+        revision=args.revision, variant=args.variant, cache_dir=args.cache_dir
     )
     unet = UNet2DConditionModel.from_pretrained(
-        args.pretrained_model_name_or_path, subfolder="unet", revision=args.revision, variant=args.variant
+        args.pretrained_model_name_or_path, subfolder="unet",
+        revision=args.revision, variant=args.variant, cache_dir=args.cache_dir
     )
     # freeze parameters of models to save more memory
     unet.requires_grad_(False)
@@ -598,23 +590,19 @@ def main():
     # details: https://github.com/huggingface/diffusers/pull/4038#discussion_r1266078401
 
     # DataLoaders creation:
-    # train_dataset, train_dataloader = vid_edit_dataset.get_data_loader(args.train_batch_size)
-    train_dataset = vid_edit_dataset.MSRVTTLocalDataset(
-        dataset_src=args.dataset_src,
-        train=True,
-        transformer=transforms.Compose([
-            transforms.Resize(args.resolution, interpolation=transforms.InterpolationMode.BILINEAR),
-            transforms.CenterCrop(args.resolution),
-            transforms.ToTensor(),
-            transforms.Normalize([0.5], [0.5]),
-        ])
-    )
+    # [SYM]: Can not use batch in webdataset, which is inconsistant with accelerator.
+    # @See: https://github.com/huggingface/accelerate/issues/1370
+    # @See: https://github.com/huggingface/accelerate/issues?q=is%3Aissue+is%3Aopen+webdataset
 
-    train_dataloader = DataLoader(train_dataset, batch_size=args.train_batch_size, shuffle=True)
+    train_dataset = create_msrvtt_webdataset(args.dataset_src)
+
+    train_dataloader = DataLoader(train_dataset, batch_size=args.train_batch_size, num_workers=args.dataloader_num_workers)
+
+    dataloader_length = math.ceil(args.train_dataset_size / args.train_batch_size)
 
     # Scheduler and math around the number of training steps.
     overrode_max_train_steps = False
-    num_update_steps_per_epoch = math.ceil(len(train_dataloader) / args.gradient_accumulation_steps)
+    num_update_steps_per_epoch = math.ceil(dataloader_length / args.gradient_accumulation_steps)
     if args.max_train_steps is None:
         args.max_train_steps = args.num_train_epochs * num_update_steps_per_epoch
         overrode_max_train_steps = True
@@ -637,7 +625,7 @@ def main():
     # HOOK
 
     # We need to recalculate our total training steps as the size of the training dataloader may have changed.
-    num_update_steps_per_epoch = math.ceil(len(train_dataloader) / args.gradient_accumulation_steps)
+    num_update_steps_per_epoch = math.ceil(dataloader_length / args.gradient_accumulation_steps)
     if overrode_max_train_steps:
         args.max_train_steps = args.num_train_epochs * num_update_steps_per_epoch
     # Afterwards we recalculate our number of training epochs
@@ -652,7 +640,7 @@ def main():
     total_batch_size = args.train_batch_size * accelerator.num_processes * args.gradient_accumulation_steps
 
     logger.info("***** Running training *****")
-    logger.info(f"  Num examples = {len(train_dataset)}")
+    logger.info(f"  Num examples = {dataloader_length}")
     logger.info(f"  Num Epochs = {args.num_train_epochs}")
     logger.info(f"  Instantaneous batch size per device = {args.train_batch_size}")
     logger.info(f"  Total train batch size (w. parallel, distributed & accumulation) = {total_batch_size}")
@@ -700,18 +688,12 @@ def main():
         unet.train()
         train_loss = 0.0
         for step, batch in enumerate(train_dataloader):
-            print(f'train by labeled data: step={step}, image = {batch[0].shape}, label = {batch[1]}')
+            print(f'train by labeled data: step={step}, image = {batch[0].shape}, label = {batch[1].shape}, noise = {batch[2].shape}')
             with accelerator.accumulate(unet):
-                image, text = batch
-                text_embeddings  = encode_prompt(text, text_encoder, tokenizer)
-                print('text_embeddings ready: ', text_embeddings.shape)
+                image, text_embeddings, noise = batch
 
                 latents = vae.encode(image).latent_dist.sample()
                 latents = latents * vae.config.scaling_factor
-                
-                print('latents ready: ', latents.shape)
-                noise = torch.randn_like(latents)
-                print('noise ready: ', noise.shape)
 
                 if args.noise_offset:
                     # https://www.crosslabs.org//blog/diffusion-with-offset-noise
@@ -722,7 +704,7 @@ def main():
                 bsz = latents.shape[0]
                 # Sample a random timestep for each image
                 timesteps = torch.randint(0, noise_scheduler.config.num_train_timesteps, (bsz//2,), device=latents.device).reshape(-1, 1)
-                timesteps = torch.concatenate([timestep, timestep], dim=1).reshape(-1)
+                timesteps = torch.concatenate([timesteps, timesteps], dim=1).reshape(-1)
                 timesteps = timesteps.long()
 
                 # Add noise to the latents according to the noise magnitude at each timestep
@@ -748,7 +730,7 @@ def main():
 
                 # Predict the noise residual and compute loss
                 model_pred = unet(noisy_latents, timesteps, encoder_hidden_states, return_dict=False)[0]
-                
+
                 # reconstruct_loss
                 if args.snr_gamma is None:
                     loss = F.mse_loss(model_pred.float(), target.float(), reduction="mean")
@@ -776,7 +758,7 @@ def main():
                     f1_t1 = split_features[0]
                     f2_t1 = split_features[1] # b//4 c h w
                     f2_t2 = split_features[2]
-                    f1_t2 = split_features[3] 
+                    f1_t2 = split_features[3]
                     def reshape_and_permute(f):
                         c, h, w = f.shape
                         return f.permute(1, 2, 0).reshape(-1, c)
@@ -784,7 +766,7 @@ def main():
                     tmp2 = reshape_and_permute(f2_t1)
                     tmp3 = reshape_and_permute(f1_t2)
                     tmp4 = reshape_and_permute(f2_t2)
-                    sim_12 = cos(tmp1, tmp2) 
+                    sim_12 = cos(tmp1, tmp2)
                     sim_34 = cos(tmp3, tmp4)
                     our_loss = ((sim_12 - sim_34) ** 2).mean()
                     print('our_loss = ', our_loss)
@@ -871,6 +853,7 @@ def main():
                     revision=args.revision,
                     variant=args.variant,
                     torch_dtype=weight_dtype,
+                    cache_dir=args.cache_dir
                 )
                 pipeline = pipeline.to(accelerator.device)
                 pipeline.set_progress_bar_config(disable=True)
@@ -940,12 +923,13 @@ def main():
                 revision=args.revision,
                 variant=args.variant,
                 torch_dtype=weight_dtype,
+                cache_dir=args.cache_dir
             )
             pipeline = pipeline.to(accelerator.device)
 
             # load attention processors
             pipeline.load_lora_weights(args.output_dir)
-     
+
             # run inference
             generator = torch.Generator(device=accelerator.device)
             if args.seed is not None:

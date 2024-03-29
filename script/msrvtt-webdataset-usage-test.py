@@ -4,12 +4,14 @@ import webdataset as wds
 from io import BytesIO
 from PIL import Image
 
-dataset = wds.WebDataset("/root/autodl-tmp/msrvtt.tar").decode(
+dataset = wds.WebDataset("/root/autodl-tmp/data/msrvtt.tar").decode(
     wds.handle_extension("input.ppm", transforms.Compose([
             lambda x : Image.open(BytesIO(x)),
             transforms.ToTensor()
         ])),
 )
+
+print(len(dataset))
 
 for i, sample in enumerate(dataset):
     for key, value in sample.items():
