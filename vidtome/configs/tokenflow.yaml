@@ -1,0 +1,48 @@
+device: cuda
+enable_xformers_memory_efficient_attention: true
+float_precision: fp16
+generation:
+  align_batch: true
+  chunk_ord: mix-4
+  chunk_size: 4
+  control: pnp
+  control_scale: 1.0
+  frame_ids: null
+  frame_range:
+  - 0
+  - 32
+  - 1
+  global_merge_ratio: 0.8
+  global_rand: 0.5
+  guidance_scale: 7.5
+  latents_path: autodl-fs/research/VidToMe-main/latents
+  local_merge_ratio: 0.9
+  merge_global: true
+  n_timesteps: 50
+  negative_prompt: ugly, blurry, low res
+  output_path: autodl-fs/research/VidToMe-main
+  pnp_attn_t: 0.5
+  pnp_f_t: 0.8
+  prompt: null
+  save_frame: true
+  use_lora: false
+height: 512
+input_path: autodl-fs/research/Tokenflow_adapter/TokenFlow/data/video7021/
+inversion:
+  batch_size: 8
+  control: none
+  control_scale: 1.0
+  force: false
+  n_frames: null
+  prompt: a baseball batter hits a glass ball to the fence and a outfielder goes
+  recon: false
+  save_intermediate: false
+  save_path: autodl-fs/research/VidToMe-main/latents
+  save_steps: 50
+  steps: 50
+  use_blip: false
+model_key: null
+sd_version: '1.5'
+seed: 123
+width: 512
+work_dir: autodl-fs/research/VidToMe-main
