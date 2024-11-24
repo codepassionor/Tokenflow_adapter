@@ -1,1 +1,0 @@
-export XDG_CACHE_HOME=/root/autodl-tmp/cache_huggingface/; python main.py
