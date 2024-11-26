@@ -74,7 +74,7 @@ We provide a comparison of the effects of different timesteps of the training an
 - [x] Add Bilateral Filter Module to Inversion Process
 - [ ] Secondary Optimization of Dataset
 - [ ] Restructuring Prompt Learner
-- [ ] Open-source more visualization results
+- [ ] Open-source More Visualization Results
 - [ ] Add Model Distillation Module
 
 ## Citation
