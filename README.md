@@ -54,6 +54,8 @@ bash train_multigpu.sh
 ```
 To accelerate web connections, the `train_ddpm.sh` script uses `proxychains`. If you encounter connection issues, verify your proxy settings. For multi-GPU training, you can modify the script and use a similar setup as shown in the ControlNet example above.
 
+#### 3. **Training DDPM (`train_ddpm`)**
+Use the script below for DDPM training:
 
 ## Visualization
 This section shows some visualization results on downstream algorithms.
