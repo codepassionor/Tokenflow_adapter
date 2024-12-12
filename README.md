@@ -19,7 +19,7 @@ pip install -r requirements.txt
 ## Training
 
 #### 1. **Dataset Preparation (`make_dataset`)**
-Before starting the training process, ensure the dataset is correctly prepared. Please download the MSRVTT dataset locally first, you can get it through this link [MRSVTT]([https://drive.google.com/file/d/15bBcfrCxr27XpTABX8Oy7fn09QYs45Cq/view?usp=drive_link](mailto:https://drive.google.com/file/d/15bBcfrCxr27XpTABX8Oy7fn09QYs45Cq/view?usp=drive_link)).
+Before starting the training process, ensure the dataset is correctly prepared. Please download the MSRVTT dataset locally first, you can get it through this link [MRSVTT](https://drive.google.com/file/d/15bBcfrCxr27XpTABX8Oy7fn09QYs45Cq/view?usp=drive_link).
 
 Then use the following script to organize and preprocess your data for training:
 ```bash
