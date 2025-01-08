@@ -58,8 +58,6 @@ bash train_multigpu.sh
 ```
 To accelerate web connections, the `train_ddpm.sh` script uses `proxychains`. If you encounter connection issues, verify your proxy settings. For multi-GPU training, you can modify the script and use a similar setup as shown in the ControlNet example above.
 
-#### 3. **Training DDPM (`train_ddpm`)**
-Use the script below for DDPM training:
 
 ## Visualization
 This section shows some visualization results on downstream algorithms.
@@ -74,12 +72,8 @@ We provide a comparison of the effects of different timesteps of the training an
 
 ## Todo List
 
-- [x] Adapter Training and Downstream Task Inference
-- [x] Add Bilateral Filter Module to Inversion Process
-- [ ] Secondary Optimization of Dataset
-- [ ] Restructuring Prompt Learner
-- [ ] Open-source More Visualization Results
-- [ ] Add Model Distillation Module
+- [x] Testing Code  
+- [ ] Open-Sourcing Additional Visualization Results  
 
 ## Citation
 
@@ -93,10 +87,3 @@ If you found this repository useful, please consider citing our paper:
   year={2024}
 }
 ```
-
-# Project Announcement
-
-We are excited to announce that following the acceptance of this paper, we will release the final checkpoint, testing code, bilateral filtering algorithm implementation, and a complete project webpage. 
-
-Stay tuned for updates!
-
