@@ -73,7 +73,7 @@ We provide a comparison of the effects of different timesteps of the training an
 ## Todo List
 
 - [x] Testing Code  
-- [ ] Open-Sourcing Additional Visualization Results
+- [ ] Open-Sourcing Much More Visualization Results
 - [ ] Project webpage
 - [ ] More detailed running instructions
 
