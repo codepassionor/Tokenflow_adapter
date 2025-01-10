@@ -1,0 +1,16 @@
+batch_size: 8
+data_path: data/breakdance
+device: cuda
+guidance_scale: 7.5
+latents_path: latents
+n_frames: 8
+n_inversion_steps: 500
+n_timesteps: 50
+negative_prompt: ugly, blurry, low res, unrealistic, unaesthetic
+output_path: tokenflow-results-timestep900_pnp_SD_1.5_lora/breakdance/a man doing
+  a trick on the ground in front of a crowd, pixel art, PixArFK/attn_0.5_f_0.8/batch_size_8/50
+pnp_attn_t: 0.5
+pnp_f_t: 0.8
+prompt: a man doing a trick on the ground in front of a crowd, pixel art, PixArFK
+sd_version: '1.5'
+seed: 1
