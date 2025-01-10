@@ -1,9 +1,9 @@
 ##
 
-# **Enhancing Low-Cost Video Editing with Lightweight Adaptors and Temporal-Aware Inversion**
+# Enhancing Low-Cost Video Editing with Lightweight Adaptors and Temporal-Aware Inversion
 
 ## Authors
-Yangfan He (University of Minnesota - Twin Cities, [he000577@umn.edu](mailto:he000577@umn.edu)), Sida Li (Peking University, [2200013094@stu.pku.edu.cn]), Jianhui Wang (University of Electronic Science & Technology of China, [20220991605023@std.uestc.edu.cn](mailto:20220991605023@std.uestc.edu.cn)), Binxu Li (Stanford University, [andy0207@stanford.edu](mailto:andy0207@stanford.edu)), Jiajun Liang† (Megvii Technology, [liangjiajun@megvii.com](mailto:liangjiajun@megvii.com))
+Yangfan He, Sida Li, Kun Li, Jianhui Wang, Binxu Li, Tianyu Shi, Jun Yin, Miao Zhang
 ## Getting Started
 1. Clone this repository:
 ```bash
