@@ -73,7 +73,9 @@ We provide a comparison of the effects of different timesteps of the training an
 ## Todo List
 
 - [x] Testing Code  
-- [ ] Open-Sourcing Additional Visualization Results  
+- [ ] Open-Sourcing Additional Visualization Results
+- [ ] Project webpage
+- [ ] More detailed running instructions
 
 ## Citation
 
@@ -81,9 +83,9 @@ If you found this repository useful, please consider citing our paper:
 
 ```bibtex
 @article{yang2024wcdt,
-  title={WcDT: World-centric Diffusion Transformer for Traffic Scene Generation},
-  author={Yang, Chen and Tian, Aaron Xuxiang and Chen, Dong and Shi, Tianyu and Heydarian, Arsalan},
-  journal={arXiv preprint arXiv:2404.02082},
-  year={2024}
+  title={Enhancing Low-Cost Video Editing with Lightweight Adaptors and Temporal-Aware Inversion},
+  author={Yangfan He, Sida Li, Kun Li, Jianhui Wang, Binxu Li, Tianyu Shi, Jun Yin, Miao Zhang, Xueqian Wang},
+  journal={arXiv preprint arXiv:2501.04606},
+  year={2025}
 }
 ```
