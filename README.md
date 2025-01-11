@@ -78,13 +78,10 @@ We provide a comparison of the effects of different timesteps of the training an
 - [ ] More detailed running instructions
 
 ## Citation
-
 If you found this repository useful, please consider citing our paper:
-
-```bibtex
-@article{yang2024wcdt,
+@article{he2025enhancing,
   title={Enhancing Low-Cost Video Editing with Lightweight Adaptors and Temporal-Aware Inversion},
-  author={Yangfan He, Sida Li, Kun Li, Jianhui Wang, Binxu Li, Tianyu Shi, Jun Yin, Miao Zhang, Xueqian Wang},
+  author={He, Yangfan and Li, Sida and Li, Kun and Wang, Jianhui and Li, Binxu and Shi, Tianyu and Yin, Jun and Zhang, Miao and Wang, Xueqian},
   journal={arXiv preprint arXiv:2501.04606},
   year={2025}
 }
