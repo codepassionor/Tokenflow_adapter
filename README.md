@@ -85,4 +85,3 @@ If you found this repository useful, please consider citing our paper:
   journal={arXiv preprint arXiv:2501.04606},
   year={2025}
 }
-```
