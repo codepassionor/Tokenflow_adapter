@@ -11,6 +11,7 @@ from text_to_video_pipeline import TextToVideoPipeline
 import utils
 import gradio_utils
 import os
+from ddim_inversion import BFHooker
 on_huggingspace = os.environ.get("SPACE_AUTHOR_NAME") == "PAIR"
 
 
@@ -60,6 +61,7 @@ class Model_lora:
             model_id, safety_checker=safety_checker, **kwargs).to(self.device).to(self.dtype)
         self.pipe.load_lora_weights("/root/autodl-tmp/lora/checkpoint/token/prefix8/pytorch_lora_weights.safetensors")
         self.pipe.fuse_lora(lora_scale=0.5)
+        self.hooker = BFHooker(self.pipe.unet)
         
         self.model_type = model_type
         self.model_name = model_id
