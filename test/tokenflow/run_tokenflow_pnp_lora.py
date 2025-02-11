@@ -16,6 +16,7 @@ from diffusers import DDIMScheduler, StableDiffusionPipeline
 from tokenflow_utils import *
 from util import save_video, seed_everything
 from prompt_learner import PrefixToken
+from ddim_inversion import BFHooker
 
 # suppress partial model loading warning
 logging.set_verbosity_error()
@@ -50,10 +51,10 @@ class TokenFlow(nn.Module):
         print('Loading SD model')
 
         pipe = StableDiffusionPipeline.from_pretrained(model_key, torch_dtype=torch.float16).to("cuda")
-        pipe.load_lora_weights("/root/autodl-tmp/lora/checkpoint/token/prefix8/pytorch_lora_weights.safetensors")
+        #pipe.load_lora_weights("/root/autodl-tmp/lora/checkpoint/token/prefix8/pytorch_lora_weights.safetensors")
         save_path = "/root/autodl-tmp/lora/checkpoint/token/prefix8/prefix_token_model.pth"
     ## lora_scale as the factor to modify
-        pipe.fuse_lora(lora_scale=0.5)
+        #pipe.fuse_lora(lora_scale=0.5)
         # pipe.enable_xformers_memory_efficient_attention()
         self.lora_inuse = True
 
@@ -80,9 +81,9 @@ class TokenFlow(nn.Module):
         clip_processor = CLIPProcessor.from_pretrained("/root/autodl-tmp/cache_huggingface/huggingface/openai/clip-vit-base-patch32/")
         self.prefix_token = self.prompt_learner(self.frames[0], clip_model, clip_processor)
 
-        self.text_embeds = self.get_text_embeds(config["prompt"], config["negative_prompt"], True)
+        self.text_embeds = self.get_text_embeds(config["prompt"], config["negative_prompt"], use_prefixtoken=False)
         pnp_inversion_prompt = self.get_pnp_inversion_prompt()
-        self.pnp_guidance_embeds = self.get_text_embeds(pnp_inversion_prompt, pnp_inversion_prompt, True).chunk(2)[0]
+        self.pnp_guidance_embeds = self.get_text_embeds(pnp_inversion_prompt, pnp_inversion_prompt, use_prefixtoken=False).chunk(2)[0]
         self.pipe = pipe
         
     @torch.no_grad()   
@@ -311,7 +312,7 @@ def run(config, lora_begin, lora_end):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--config_path', type=str, default='configs/config_pnp.yaml')
+    parser.add_argument('--config_path', type=str, default='configs/config_pnp_0.yaml')
     opt = parser.parse_args()
     with open(opt.config_path, "r") as f:
         config = yaml.safe_load(f)
