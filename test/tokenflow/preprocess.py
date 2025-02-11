@@ -365,3 +365,4 @@ if __name__ == "__main__":
     save_video_frames(video_path, img_size=(opt.W, opt.H))
     opt.data_path = os.path.join('data', Path(video_path).stem)
     prep(opt)
+    
