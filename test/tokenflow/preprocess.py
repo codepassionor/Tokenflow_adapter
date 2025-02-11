@@ -12,6 +12,7 @@ from torchvision.io import write_video
 from pathlib import Path
 from util import *
 import torchvision.transforms as T
+from ddim_inversion import BFHooker
 device = 'cuda'
 
 
@@ -71,6 +72,8 @@ class Preprocess(nn.Module):
         elif self.sd_version == 'depth':
             self.depth_maps = self.prepare_depth_maps()
         self.scheduler = DDIMScheduler.from_pretrained(model_key, subfolder="scheduler")
+
+        self.use_bf_inv = opt.use_bf_inv
         
         # self.unet.enable_xformers_memory_efficient_attention()
         print(f'[INFO] loaded stable diffusion!')
@@ -273,12 +276,19 @@ class Preprocess(nn.Module):
         cond = self.get_text_embeds(inversion_prompt, "")[1].unsqueeze(0)
         latent_frames = self.latents
 
+        if self.use_bf_inv:
+            hooker = BFHooker(self.unet)
+
         inverted_x = self.ddim_inversion(cond,
                                          latent_frames,
                                          save_path,
                                          batch_size=batch_size,
                                          save_latents=True,
                                          timesteps_to_save=timesteps_to_save)
+        
+        if self.use_bf_inv:
+            hooker.remove_hook()
+
         latent_reconstruction = self.ddim_sample(inverted_x, cond, batch_size=batch_size)
                                                  
         rgb_reconstruction = self.decode_latents(latent_reconstruction)
