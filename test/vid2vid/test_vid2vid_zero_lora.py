@@ -34,6 +34,7 @@ from einops import rearrange
 from vid2vid_zero.p2p.p2p_stable import AttentionReplace, AttentionRefine
 from vid2vid_zero.p2p.ptp_utils import register_attention_control
 from vid2vid_zero.p2p.null_text_w_ptp import NullInversion
+from ddim_inversion import BFHooker
 
 
 # Will error if the minimal version of diffusers is not installed. Remove at your own risks.
@@ -222,6 +223,7 @@ def main(
         generator = torch.Generator(device="cuda")
         generator.manual_seed(seed)
 
+        hooker = BFHooker(validation_pipeline.unet)
         # perform inversion
         ddim_inv_latent = None
         if validation_data.use_null_inv:
@@ -246,6 +248,7 @@ def main(
 
         ddim_inv_latent = ddim_inv_latent.repeat(2, 1, 1, 1, 1)
 
+        hooker.remove_hook()
         for idx, prompt in enumerate(validation_data.prompts):
             prompts = [input_dataset.prompt, prompt]  # a list of two prompts
             cross_replace_steps, self_replace_steps = prepare_control(unet=unet, prompts=prompts, validation_data=validation_data)
