@@ -16,6 +16,7 @@ import yaml
 from pytorch_fid import fid_score
 import numpy as np
 import cv2
+from ddim_inversion import BFHooker
 
 def calc_lpips(image_paths):
     images = [Image.open(img_path).convert('RGB') for img_path in image_paths]
@@ -108,25 +109,30 @@ if __name__ == "__main__":
                 prompt_id = key
                 prompt_word = value
             print("Start inversion!")
+            hooker = BFHooker(pipe.unet)
             inversion = Inverter(pipe, scheduler, config)
             inversion.force = True
             inversion(config.input_path, config.inversion.save_path, lora_begin, lora_end, use_prefixtoken=False)
             
             print("Start generation!")
+            #hooker.remove_hook()
             generator = Generator(pipe, scheduler, config, prompt)
             frame_ids = get_frame_ids(
                 config.generation.frame_range, config.generation.frame_ids)
             generator(config.input_path, config.generation.latents_path,
                     f'{lora_begin}/' + config.generation.output_path + '/' + prompt_id + "/base", frame_ids=frame_ids, lora_begin=lora_begin, lora_end=lora_end, use_prefixtoken=False)
             
-            
+            print("Start inversion!")
             pipe.load_lora_weights("/root/autodl-tmp/lora/checkpoint/token/prefix8/pytorch_lora_weights.safetensors")
             pipe.fuse_lora(lora_scale=0.5)
+            hooker = BFHooker(pipe.unet)
             inversion = Inverter(pipe, scheduler, config)
             inversion.withlora = True
             #inversion.force = True
             inversion(config.input_path, config.inversion.save_path, lora_begin, lora_end, use_prefixtoken=False)
-
+            
+            print("Start generation!")
+            #hooker.remove_hook()
             generator = Generator(pipe, scheduler, config, prompt)
             generator.withlora = True
             frame_ids = get_frame_ids(
