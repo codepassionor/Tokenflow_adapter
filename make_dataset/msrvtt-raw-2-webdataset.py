@@ -7,8 +7,8 @@ import torch
 from tqdm import tqdm
 from transformers import CLIPTextModel, CLIPTokenizer
 
-raw_msrvtt_src = '/root/autodl-tmp/data/MSRVTT'
-sink = wds.TarWriter("/root/autodl-tmp/data/msrvtt-webdataset.tar")
+raw_msrvtt_src = '/data/MSRVTT'
+sink = wds.TarWriter("/data/msrvtt-webdataset.tar")
 video_subfolder = 'video'
 
 
@@ -34,11 +34,11 @@ pretrained_model_name_or_path = 'runwayml/stable-diffusion-v1-5'
 
 tokenizer = CLIPTokenizer.from_pretrained(
     pretrained_model_name_or_path, subfolder="tokenizer",
-    revision=None, cache_dir='/root/autodl-tmp/cache'
+    revision=None, cache_dir='cache'
 )
 text_encoder = CLIPTextModel.from_pretrained(
     pretrained_model_name_or_path, subfolder="text_encoder",
-    revision=None, cache_dir='/root/autodl-tmp/cache'
+    revision=None, cache_dir='cache'
 )
 text_encoder.to('cuda')
 def wapper_encode_prompt(text):

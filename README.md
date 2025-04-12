@@ -2,8 +2,6 @@
 
 # Enhancing Low-Cost Video Editing with Lightweight Adaptors and Temporal-Aware Inversion
 
-## Authors
-Yangfan He, Sida Li, Kun Li, Jianhui Wang, Binxu Li, Tianyu Shi, Jun Yin, Miao Zhang
 ## Getting Started
 1. Clone this repository:
 ```bash
@@ -77,13 +75,3 @@ We provide a comparison of the effects of different timesteps of the training an
 - [ ] Project webpage
 - [ ] More detailed running instructions
 
-## Citation
-If you found this repository useful, please consider citing our paper:
-```
-@article{he2025enhancing,
-  title = {Enhancing Low-Cost Video Editing with Lightweight Adaptors and Temporal-Aware Inversion},
-  author = {He, Yangfan and Li, Sida and Li, Kun and Wang, Jianhui and Li, Binxu and Shi, Tianyu and Yin, Jun and Zhang, Miao and Wang, Xueqian},
-  journal = {arXiv preprint arXiv:2501.04606},
-  year = {2025}
-}
-```

@@ -72,8 +72,8 @@ if __name__ == "__main__":
 
     inception_model = torchvision.models.inception_v3(pretrained=True)
     from transformers import CLIPProcessor, CLIPModel
-    clip_model = CLIPModel.from_pretrained("/root/autodl-tmp/cache_huggingface/huggingface/openai/clip-vit-base-patch32")
-    processor = CLIPProcessor.from_pretrained("/root/autodl-tmp/cache_huggingface/huggingface/openai/clip-vit-base-patch32")
+    clip_model = CLIPModel.from_pretrained("openai/clip-vit-base-patch32")
+    processor = CLIPProcessor.from_pretrained("openai/clip-vit-base-patch32")
     lpips_model = lpips.LPIPS(net='alex')
 
     CLIP_score = []
@@ -152,19 +152,6 @@ if __name__ == "__main__":
             yaml.dump(config, f)
         run_tokenflow_pnp_lora.run(config, opt.begin, opt.end)
 
-        '''
-        start_time = time.perf_counter()
-        run_tokenflow_pnp.run(config)
-        end_time = time.perf_counter()
-        execution_time = end_time - start_time
-
-        start_time_lora = time.perf_counter()
-        run_tokenflow_pnp_lora.run(config)
-        end_time_lora = time.perf_counter()
-        execution_time_lora = end_time_lora - start_time_lora
-        print(f"Tokenflow's time required is: {execution_time} s")
-        print(f"Tokenflow with lora's time required is: {execution_time_lora} s")
-        '''
         # test
         generated_images_folder_lora = config["output_path"] + "/img_ode_lora"
         image_paths_lora = glob.glob(config["output_path"] + "/img_ode_lora" + "/*.png")
@@ -196,15 +183,6 @@ if __name__ == "__main__":
         FID_score_lora.append(fid_value_lora)
         IPIPS_score_lora.append(lpips_similarity_lora)
 
-        '''
-        with open('result.txt', 'a') as file:
-            file.write(f"clip_score_{i}: {clip_score:.6f}" +'\n')
-            file.write(f"fid_value_{i}: {fid_value:.6f}" +'\n')
-            file.write(f"lpips_similarity_{i}: {lpips_similarity:.6f}" +'\n')
-            file.write(f"clip_score_lora_{i}: {clip_score_lora:.6f}" +'\n')
-            file.write(f"fid_value_lora_{i}: {fid_value_lora:.6f}" +'\n')
-            file.write(f"lpips_similarity_lora_{i}: {lpips_similarity_lora:.6f}" +'\n')
-        '''
 
     with open(f'output_{opt.begin}.txt', 'w') as file:
         

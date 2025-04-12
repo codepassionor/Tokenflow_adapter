@@ -71,32 +71,6 @@ if __name__ == "__main__":
     FID_score_lora = []
     IPIPS_score_lora = []
     
-    '''
-    config = load_config_example()
-    pipe, scheduler, model_key = init_model(
-        config.device, config.sd_version, config.model_key, config.generation.control, config.float_precision)
-    config.model_key = model_key
-    seed_everything(config.seed)
-    
-    print("Start inversion!")
-    inversion = Inverter(pipe, scheduler, config)
-    inversion(config.input_path, config.inversion.save_path)
-
-    print("Start generation!")
-    generator = Generator(pipe, scheduler, config)
-    frame_ids = get_frame_ids(
-        config.generation.frame_range, config.generation.frame_ids)
-    generator(config.input_path, config.generation.latents_path,
-            config.generation.output_path + "/base", frame_ids=frame_ids)
-    
-    pipe.load_lora_weights("/root/autodl-fs/ratio_0.1_rank_4_full_msrvtt/checkpoint-99000/pytorch_lora_weights.safetensors")
-    pipe.fuse_lora(lora_scale=0.5)
-    generator = Generator(pipe, scheduler, config)
-    frame_ids = get_frame_ids(
-        config.generation.frame_range, config.generation.frame_ids)
-    generator(config.input_path, config.generation.latents_path,
-            config.generation.output_path + "/lora", frame_ids=frame_ids)
-    '''
     for i in range(6):
         config, lora_begin, lora_end = load_config(i)
         pipe, scheduler, model_key = init_model(
@@ -123,7 +97,7 @@ if __name__ == "__main__":
                     f'{lora_begin}/' + config.generation.output_path + '/' + prompt_id + "/base", frame_ids=frame_ids, lora_begin=lora_begin, lora_end=lora_end, use_prefixtoken=False)
             
             print("Start inversion!")
-            pipe.load_lora_weights("/root/autodl-tmp/lora/checkpoint/token/prefix8/pytorch_lora_weights.safetensors")
+            pipe.load_lora_weights("checkpoint/token/prefix8/pytorch_lora_weights.safetensors")
             pipe.fuse_lora(lora_scale=0.5)
             hooker = BFHooker(pipe.unet)
             inversion = Inverter(pipe, scheduler, config)
@@ -199,10 +173,4 @@ if __name__ == "__main__":
             file.write(str(element)+'\n')
         file.write('\n')
 
-    #print('CLIP_Score:', sum(CLIP_score) / len(CLIP_score))
-    #print('CLIP_Score with lora:', sum(CLIP_score_lora) / len(CLIP_score_lora))
-    #print('FID value:', sum(FID_score) / len(FID_score))
-    #print('FID value with lora:', sum(FID_score_lora) / len(FID_score_lora))
-    #print("Average LPIPS similarity:", sum(IPIPS_score) / len(IPIPS_score))
-    #print("Average LPIPS similarity with lora:", sum(IPIPS_score_lora) / len(IPIPS_score_lora))
 

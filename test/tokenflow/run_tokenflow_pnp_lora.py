@@ -36,12 +36,11 @@ class TokenFlow(nn.Module):
         self.sd_version = '1.5'
         
         if sd_version == '2.1':
-            model_key = "/root/autodl-tmp/cache_huggingface/huggingface/hub/models--stabilityai--stable-diffusion-2-1-base"
+            model_key = "stabilityai/stable-diffusion-2-1-base"
         elif sd_version == '2.0':
             model_key = "stabilityai/stable-diffusion-2-base"
         elif sd_version == '1.5':
-            #model_key = "runwayml/stable-diffusion-v1-5"
-            model_key = "/root/autodl-fs/models--runwayml--stable-diffusion-v1-5/"
+            model_key = "runwayml/stable-diffusion-v1-5"
         elif sd_version == 'depth':
             model_key = "stabilityai/stable-diffusion-2-depth"
         else:
@@ -51,8 +50,8 @@ class TokenFlow(nn.Module):
         print('Loading SD model')
 
         pipe = StableDiffusionPipeline.from_pretrained(model_key, torch_dtype=torch.float16).to("cuda")
-        #pipe.load_lora_weights("/root/autodl-tmp/lora/checkpoint/token/prefix8/pytorch_lora_weights.safetensors")
-        save_path = "/root/autodl-tmp/lora/checkpoint/token/prefix8/prefix_token_model.pth"
+        pipe.load_lora_weights("checkpoint/token/prefix8/pytorch_lora_weights.safetensors")
+        save_path = "checkpoint/token/prefix8/prefix_token_model.pth"
     ## lora_scale as the factor to modify
         #pipe.fuse_lora(lora_scale=0.5)
         # pipe.enable_xformers_memory_efficient_attention()
@@ -77,8 +76,8 @@ class TokenFlow(nn.Module):
         if self.sd_version == 'depth':
             self.depth_maps = self.prepare_depth_maps()
 
-        clip_model = CLIPModel.from_pretrained("/root/autodl-tmp/cache_huggingface/huggingface/openai/clip-vit-base-patch32/").cuda()
-        clip_processor = CLIPProcessor.from_pretrained("/root/autodl-tmp/cache_huggingface/huggingface/openai/clip-vit-base-patch32/")
+        clip_model = CLIPModel.from_pretrained("openai/clip-vit-base-patch32/").cuda()
+        clip_processor = CLIPProcessor.from_pretrained("openai/clip-vit-base-patch32/")
         self.prefix_token = self.prompt_learner(self.frames[0], clip_model, clip_processor)
 
         self.text_embeds = self.get_text_embeds(config["prompt"], config["negative_prompt"], use_prefixtoken=False)

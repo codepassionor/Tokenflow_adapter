@@ -111,7 +111,7 @@ class FeatureExtractor:
         self.hook.remove()
 
 if __name__ == '__main__':
-    load_model = UNet2DConditionModel.from_pretrained('/data/workspace/huggingface/hub/models--runwayml--stable-diffusion-v1-5/snapshots/1d0c4ebf6ff58a5caecab40fa1406526bca4b5b9', subfolder="unet").cuda()
+    load_model = UNet2DConditionModel.from_pretrained('runwayml/stable-diffusion-v1-5/snapshots/1d0c4ebf6ff58a5caecab40fa1406526bca4b5b9', subfolder="unet").cuda()
     hooker = FeatureExtractor(load_model)
 
     import torch

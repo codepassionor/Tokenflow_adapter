@@ -163,7 +163,7 @@ def main(
         safety_checker=None, feature_extractor=None,
     )
     validation_pipeline.enable_vae_slicing()
-    validation_pipeline.load_lora_weights("/root/autodl-tmp/lora/checkpoint/token/prefix8/pytorch_lora_weights.safetensors")
+    validation_pipeline.load_lora_weights("checkpoint/token/prefix8/pytorch_lora_weights.safetensors")
     validation_pipeline.fuse_lora(lora_scale=0.5)
     validation_pipeline.withlora = True
     #validation_pipeline.disable_lora()

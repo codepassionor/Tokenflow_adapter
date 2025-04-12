@@ -9,10 +9,10 @@ from transformers import CLIPTextModel, CLIPTokenizer
 from itertools import combinations
 import random
 
-raw_msrvtt_src = '/root/autodl-tmp/dataset/MSRVTT'
+raw_msrvtt_src = 'dataset/MSRVTT'
 video_subfolder = 'TrainValVideo'
 
-'''def prepare_depth_maps(frame1, frame2, device='cuda'):
+'''def prepare_depth_maps(frame1, frame2, device='cuda'):d
     depth_maps = []
     model = depth_model(device)
 
@@ -26,11 +26,11 @@ video_subfolder = 'TrainValVideo'
 @torch.no_grad()
 def prepare_depth_maps(frame1, frame2, model_type='DPT_Large', device='cuda'):
     depth_maps = []
-    midas = torch.hub.load("/root/autodl-tmp/intel-isl/MiDaS", model_type, source='local')
+    midas = torch.hub.load("intel-isl/MiDaS", model_type, source='local')
     midas.to(device)
     midas.eval()
 
-    midas_transforms = torch.hub.load("/root/autodl-tmp/intel-isl/MiDaS", "transforms", source='local')
+    midas_transforms = torch.hub.load("intel-isl/MiDaS", "transforms", source='local')
 
     if model_type == "DPT_Large" or model_type == "DPT_Hybrid":
         transform = midas_transforms.dpt_transform
@@ -78,15 +78,15 @@ def encode_prompt(prompt_batch, text_encoder, tokenizer):
     return prompt_embeds[0]
 
 
-pretrained_model_name_or_path = '/root/autodl-tmp/cache_huggingface/huggingface/hub/models--stabilityai--stable-diffusion-v1-5'
+pretrained_model_name_or_path = 'runwayml/stable-diffusion-v1-5'
 
 tokenizer = CLIPTokenizer.from_pretrained(
     pretrained_model_name_or_path, subfolder="tokenizer",
-    revision=None, cache_dir='/root/autodl-tmp/cache'
+    revision=None, cache_dir='cache'
 )
 text_encoder = CLIPTextModel.from_pretrained(
     pretrained_model_name_or_path, subfolder="text_encoder",
-    revision=None, cache_dir='/root/autodl-tmp/cache'
+    revision=None, cache_dir='cache'
 )
 
 text_encoder.to('cuda')
@@ -112,7 +112,7 @@ for sentence in data_info['sentences']:
     else:
         prompts[sentence["video_id"]] = [sentence["caption"]]
 
-sink = wds.ShardWriter("/root/autodl-tmp/dataset/data/msrvtt-webdataset.shard-%06d.tar", maxcount=500, maxsize=1e8)
+sink = wds.ShardWriter("dataset/data/msrvtt-webdataset.shard-%06d.tar", maxcount=500, maxsize=1e8)
 
 for video_id in tqdm(dataset_src):
     

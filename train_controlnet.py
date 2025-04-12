@@ -258,7 +258,7 @@ def parse_args(input_args=None):
     parser.add_argument(
         "--pretrained_model_name_or_path",
         type=str,
-        default="/root/autodl-tmp/cache_huggingface/huggingface/hub/models--runwayml--stable-diffusion-v1-5/",
+        default="runwayml/stable-diffusion-v1-5",
         help="Path to pretrained model or model identifier from huggingface.co/models.",
     )
     parser.add_argument(
@@ -296,7 +296,7 @@ def parse_args(input_args=None):
     parser.add_argument(
         "--cache_dir",
         type=str,
-        default="/root/autodl-tmp/lora_fs/vid_multigpu/",
+        default="",
         help="The directory where the downloaded models and datasets will be stored.",
     )
     parser.add_argument("--seed", type=int, default=None, help="A seed for reproducible training.")

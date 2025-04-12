@@ -85,7 +85,7 @@ def preprocess(sample):
 
 def get_data_loader(args, shard_shuffle=4, sample_shuffle=128):
     # 获取数据集的 URL 列表
-    urls = sorted(glob.glob("/root/autodl-tmp/lora_fs/wd_MSRVTT/" + '/msrvtt-webdataset.shard-*.tar'))
+    urls = sorted(glob.glob("/wd_MSRVTT/" + '/msrvtt-webdataset.shard-*.tar'))
     batch_size = args.train_batch_size
     image_transforms = transforms.Compose(
         [

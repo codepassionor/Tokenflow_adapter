@@ -70,11 +70,11 @@ class Inverter(nn.Module):
         self.frame_height, self.frame_width = config.height, config.width
         self.work_dir = config.work_dir
 
-        save_path = "/root/autodl-tmp/lora/checkpoint/token/prefix8/prefix_token_model.pth"
+        save_path = "checkpoint/token/prefix8/prefix_token_model.pth"
         self.prompt_learner = PrefixToken(8).cuda()
         self.prompt_learner.load(save_path, pipe.unet.device)
-        self.clip_model = CLIPModel.from_pretrained("/root/autodl-tmp/cache_huggingface/huggingface/openai/clip-vit-base-patch32/").cuda()
-        self.clip_processor = CLIPProcessor.from_pretrained("/root/autodl-tmp/cache_huggingface/huggingface/openai/clip-vit-base-patch32/")
+        self.clip_model = CLIPModel.from_pretrained("openai/clip-vit-base-patch32/").cuda()
+        self.clip_processor = CLIPProcessor.from_pretrained("openai/clip-vit-base-patch32/")
 
 
 

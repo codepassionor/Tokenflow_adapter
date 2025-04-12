@@ -109,8 +109,8 @@ def parse_args():
     parser.add_argument(
         "--dataset_src",
         type=str,
-        default="/root/autodl-tmp/dataset/wd_MSRVTT",
-        help=("File of `.tar` which is webdataset file. e.g.:/root/autodl-tmp/data/msrvtt.tar")
+        default="dataset/wd_MSRVTT",
+        help=("File of `.tar` which is webdataset file.")
     )
     parser.add_argument(
         "--pretrained_model_name_or_path",
@@ -121,7 +121,7 @@ def parse_args():
     parser.add_argument(
         "--cache_dir",
         type=str,
-        default="/root/autodl-tmp/dataset",
+        default="dataset",
         help="Path to cache pretrained model (must with large amount of free space)",
     )
     parser.add_argument(
@@ -435,8 +435,8 @@ def main():
 
     # Load scheduler, tokenizer and models.
 
-    clip_model = CLIPModel.from_pretrained("/root/autodl-tmp/dataset/openai/clip-vit-base-patch32")
-    clip_processor = CLIPProcessor.from_pretrained("/root/autodl-tmp/dataset/openai/clip-vit-base-patch32")
+    clip_model = CLIPModel.from_pretrained("openai/clip-vit-base-patch32")
+    clip_processor = CLIPProcessor.from_pretrained("openai/clip-vit-base-patch32")
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     clip_model.to(device)

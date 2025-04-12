@@ -55,8 +55,8 @@ def extract_frames(video_path, output_folder):
 
 if __name__ == "__main__":
     inception_model = torchvision.models.inception_v3(pretrained=True)
-    clip_model = CLIPModel.from_pretrained("/root/autodl-tmp/cache_huggingface/huggingface/openai/clip-vit-base-patch32/")
-    processor = CLIPProcessor.from_pretrained("/root/autodl-tmp/cache_huggingface/huggingface/openai/clip-vit-base-patch32/")
+    clip_model = CLIPModel.from_pretrained("openai/clip-vit-base-patch32/")
+    processor = CLIPProcessor.from_pretrained("openai/clip-vit-base-patch32/")
     lpips_model = lpips.LPIPS(net='alex')
     model = Model(device = "cuda", dtype = torch.float16)
     model_lora = Model_lora(device = "cuda", dtype = torch.float16)
@@ -64,7 +64,7 @@ if __name__ == "__main__":
     IPIPS_score = []
     CLIP_score_lora = []
     IPIPS_score_lora = []
-    model_name = "/root/autodl-fs/models--runwayml--stable-diffusion-v1-5/"
+    model_name = "runwayml/stable-diffusion-v1-5"
 
     for i in range(6):
         parser = argparse.ArgumentParser()
@@ -72,7 +72,7 @@ if __name__ == "__main__":
         parser.add_argument('--end', type=int, default=300)
         opt = parser.parse_args()
 
-        with open(f'/root/autodl-tmp/lora/Tokenflow_adapter/tokenflow_test/data/test_{i}.json') as f:
+        with open(f'data/test_{i}.json') as f:
             metadata = json.load(f)
         prompt = metadata["caption_0"]
         params = {"t0": 44, "t1": 47 , "motion_field_strength_x" : 12, "motion_field_strength_y" : 12, "video_length": 8}

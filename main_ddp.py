@@ -118,13 +118,13 @@ def parse_args():
     parser.add_argument(
         "--pretrained_model_name_or_path",
         type=str,
-        default="/root/autodl-tmp/cache_huggingface/huggingface/hub/models--runwayml--stable-diffusion-v1-5/",
+        default="runwayml/stable-diffusion-v1-5",
         help="Path to pretrained model or model identifier from huggingface.co/models.",
     )
     parser.add_argument(
         "--cache_dir",
         type=str,
-        default="/root/autodl-tmp/cache",
+        default="cache",
         help="Path to cache pretrained model (must with large amount of free space)",
     )
     parser.add_argument(
@@ -603,7 +603,7 @@ def main():
                 repo_id=args.hub_model_id or Path(args.output_dir).name, exist_ok=True, token=args.hub_token
             ).repo_id
     
-    controlnet_path = "/root/autodl-tmp/lora_fs/vid_multigpu/controlnet-model/checkpoint-100000"
+    controlnet_path = "controlnet-model/checkpoint-100000"
     # Load scheduler, tokenizer and models.
     noise_scheduler = DDIMScheduler.from_pretrained(
         args.pretrained_model_name_or_path, subfolder="scheduler", cache_dir=args.cache_dir
@@ -628,9 +628,9 @@ def main():
         controlnet_path, subfolder="controlnet",
         revision=args.revision, variant=args.variant, cache_dir=args.cache_dir
     )
-    clip_model = CLIPModel.from_pretrained("/root/autodl-tmp/cache_huggingface/huggingface/hub/openai/clip-vit-base-patch32")
-    clip_processor = CLIPProcessor.from_pretrained("/root/autodl-tmp/cache_huggingface/huggingface/hub/openai/clip-vit-base-patch32")
-    pretrained_path = "/root/autodl-tmp/lora_fs/vid_multigpu/prompt_learner/prefix_token_model_1.pth"
+    clip_model = CLIPModel.from_pretrained("openai/clip-vit-base-patch32")
+    clip_processor = CLIPProcessor.from_pretrained("openai/clip-vit-base-patch32")
+    pretrained_path = "prompt_learner/prefix_token_model_1.pth"
     loaded_prompt_learner = PrefixToken(4)            #.load(pretrained_path, accelerator.device)
     #loaded_prompt_learner.load(pretrained_path, unet.device)
     # freeze parameters of models to save more memory

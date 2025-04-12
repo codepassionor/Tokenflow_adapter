@@ -68,8 +68,8 @@ def extract_frames(video_path, output_folder):
 if __name__ == "__main__":
     inception_model = torchvision.models.inception_v3(pretrained=True)
     from transformers import CLIPProcessor, CLIPModel
-    clip_model = CLIPModel.from_pretrained("/root/autodl-tmp/cache_huggingface/huggingface/openai/clip-vit-base-patch32/")
-    processor = CLIPProcessor.from_pretrained("/root/autodl-tmp/cache_huggingface/huggingface/openai/clip-vit-base-patch32/")
+    clip_model = CLIPModel.from_pretrained("openai/clip-vit-base-patch32/")
+    processor = CLIPProcessor.from_pretrained("openai/clip-vit-base-patch32/")
     lpips_model = lpips.LPIPS(net='alex')
 
     CLIP_score = []
@@ -78,13 +78,7 @@ if __name__ == "__main__":
     CLIP_score_lora = []
     FID_score_lora = []
     IPIPS_score_lora = []
-    '''
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--config", type=str, default=f"./configs/skateboard-man.yaml")
-    args = parser.parse_args()
-    test_vid2vid_zero.main(**OmegaConf.load(args.config))
-    test_vid2vid_zero_lora.main(**OmegaConf.load(args.config))
-    '''
+
     yaml_files = glob.glob(f'./configs/style_config/*.yaml')
     num = 0
     for file_name in yaml_files:

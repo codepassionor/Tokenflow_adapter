@@ -9,7 +9,7 @@ from transformers import CLIPTextModel, CLIPTokenizer
 from itertools import combinations
 import random
 
-raw_msrvtt_src = '/root/autodl-tmp/data/MSRVTT'
+raw_msrvtt_src = 'data/MSRVTT'
 video_subfolder = 'video'
 
 
@@ -35,11 +35,11 @@ pretrained_model_name_or_path = 'runwayml/stable-diffusion-v1-5'
 
 tokenizer = CLIPTokenizer.from_pretrained(
     pretrained_model_name_or_path, subfolder="tokenizer",
-    revision=None, cache_dir='/root/autodl-tmp/cache'
+    revision=None, cache_dir='cache'
 )
 text_encoder = CLIPTextModel.from_pretrained(
     pretrained_model_name_or_path, subfolder="text_encoder",
-    revision=None, cache_dir='/root/autodl-tmp/cache'
+    revision=None, cache_dir='cache'
 )
 text_encoder.to('cuda')
 def wapper_encode_prompt(text):
@@ -66,7 +66,7 @@ total_dataset_src = tqdm(dataset_src)
 
 
 
-sink = wds.ShardWriter("/root/autodl-tmp/data/msrvtt-webdataset.shard-%06d.tar", maxcount=500, maxsize=1e8)
+sink = wds.ShardWriter("data/msrvtt-webdataset.shard-%06d.tar", maxcount=500, maxsize=1e8)
 for video_id in total_dataset_src:
     data_path = os.path.join(raw_msrvtt_src, os.path.join(video_subfolder, video_id + '.mp4'))
     total_dataset_src.set_description(f"Processing {video_id}")
