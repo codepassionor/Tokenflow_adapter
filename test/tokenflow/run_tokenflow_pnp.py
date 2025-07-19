@@ -32,12 +32,11 @@ class TokenFlow(nn.Module):
         sd_version = config["sd_version"]
         self.sd_version = sd_version
         if sd_version == '2.1':
-            model_key = "/root/autodl-tmp/cache_huggingface/huggingface/hub/models--stabilityai--stable-diffusion-2-1-base"
+            model_key = "stabilityai/stable-diffusion-2-1-base"
         elif sd_version == '2.0':
             model_key = "stabilityai/stable-diffusion-2-base"
         elif sd_version == '1.5':
-            #model_key = "runwayml/stable-diffusion-v1-5"
-            model_key = "/root/autodl-fs/models--runwayml--stable-diffusion-v1-5/"
+            model_key = "runwayml/stable-diffusion-v1-5"
         elif sd_version == 'depth':
             model_key = "stabilityai/stable-diffusion-2-depth"
         else:

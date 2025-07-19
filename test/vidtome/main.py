@@ -60,8 +60,8 @@ if __name__ == "__main__":
 
     inception_model = torchvision.models.inception_v3(pretrained=True)
 
-    clip_model = CLIPModel.from_pretrained("/root/autodl-tmp/cache_huggingface/huggingface/openai/clip-vit-base-patch32/")
-    processor = CLIPProcessor.from_pretrained("/root/autodl-tmp/cache_huggingface/huggingface/openai/clip-vit-base-patch32/")
+    clip_model = CLIPModel.from_pretrained("openai/clip-vit-base-patch32/")
+    processor = CLIPProcessor.from_pretrained("openai/clip-vit-base-patch32/")
     lpips_model = lpips.LPIPS(net='alex')
 
     CLIP_score = []
@@ -97,7 +97,7 @@ if __name__ == "__main__":
                     f'{lora_begin}/' + config.generation.output_path + '/' + prompt_id + "/base", frame_ids=frame_ids, lora_begin=lora_begin, lora_end=lora_end, use_prefixtoken=False)
             
             print("Start inversion!")
-            pipe.load_lora_weights("checkpoint/token/prefix8/pytorch_lora_weights.safetensors")
+            pipe.load_lora_weights("checkpoint/pytorch_lora_weights.safetensors")
             pipe.fuse_lora(lora_scale=0.5)
             hooker = BFHooker(pipe.unet)
             inversion = Inverter(pipe, scheduler, config)

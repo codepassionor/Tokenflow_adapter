@@ -50,8 +50,8 @@ class TokenFlow(nn.Module):
         print('Loading SD model')
 
         pipe = StableDiffusionPipeline.from_pretrained(model_key, torch_dtype=torch.float16).to("cuda")
-        pipe.load_lora_weights("checkpoint/token/prefix8/pytorch_lora_weights.safetensors")
-        save_path = "checkpoint/token/prefix8/prefix_token_model.pth"
+        pipe.load_lora_weights("checkpointpytorch_lora_weights.safetensors")
+        save_path = "checkpoint/prefix_token_model.pth"
     ## lora_scale as the factor to modify
         #pipe.fuse_lora(lora_scale=0.5)
         # pipe.enable_xformers_memory_efficient_attention()

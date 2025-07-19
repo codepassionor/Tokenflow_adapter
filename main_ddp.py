@@ -630,7 +630,7 @@ def main():
     )
     clip_model = CLIPModel.from_pretrained("openai/clip-vit-base-patch32")
     clip_processor = CLIPProcessor.from_pretrained("openai/clip-vit-base-patch32")
-    pretrained_path = "prompt_learner/prefix_token_model_1.pth"
+    pretrained_path = "prompt_learner/prefix_token_model.pth"
     loaded_prompt_learner = PrefixToken(4)            #.load(pretrained_path, accelerator.device)
     #loaded_prompt_learner.load(pretrained_path, unet.device)
     # freeze parameters of models to save more memory
@@ -781,8 +781,6 @@ def main():
         unet, controlnet, optimizer, train_dataloader, lr_scheduler, loaded_prompt_learner, clip_model, clip_processor
     )
 
-    # HOOK
-
     # We need to recalculate our total training steps as the size of the training dataloader may have changed.
     num_update_steps_per_epoch = math.ceil(dataloader_length / args.gradient_accumulation_steps)
     if overrode_max_train_steps:
@@ -795,25 +793,6 @@ def main():
     if accelerator.is_main_process:
         accelerator.init_trackers("text2image-fine-tune", config=vars(args))
     
-    '''
-    # 修改1：Train之前用ddim_inversion为每个视频帧保存噪声
-    #print("开始修改1")
-    noise_list = []  # 用于存储每个视频帧的噪声
-    '''
-
-    '''
-    # 生成 video_frames ，包含所有视频帧的列表
-    video_frames = []
-    for step, batch in enumerate(train_dataloader):
-        # 假设 batch 是一个包含多个视频帧的列表
-        video_frames.extend(batch)
-    #print("第一个循环结束")
-
-    # 对每个视频帧进行处理
-    for frame in video_frames:  # video_frames是包含所有视频帧的列表
-        process_video_frame(frame)
-    #print('修改1完成')
-    '''
     # Train!
     total_batch_size = args.train_batch_size * accelerator.num_processes * args.gradient_accumulation_steps
 
@@ -967,17 +946,6 @@ def main():
                     return_dict=False,
                 )[0]
 
-                #model_pred = unet(noisy_latents, timesteps, encoder_hidden_states, return_dict=False)[0]
-                # if torch.isinf(model_pred).any():
-                #     raise ValueError("预测模型出现inf")
-                # if torch.isinf(target).any():
-                #     raise ValueError("target出现inf")
-                # if torch.isnan(model_pred).any():
-                #     raise ValueError("预测模型出现nan")
-                # if torch.isnan(target).any():
-                #     raise ValueError("target出现nan")
-
-
                 # reconstruct_loss
                 if args.snr_gamma is None:
                     loss = F.mse_loss(model_pred.float(), target.float(), reduction="mean")
@@ -997,11 +965,6 @@ def main():
                     loss = F.mse_loss(model_pred.float(), target.float(), reduction="none")
                     loss = loss.mean(dim=list(range(1, len(loss.shape)))) * mse_loss_weights
                     loss = loss.mean()
-                    
-                if torch.isinf(loss).any():
-                    raise ValueError("loss出现inf")
-                if torch.isnan(loss).any():
-                    raise ValueError("loss出现nan")
 
                 features = hook.get_features() #(2, 32 * 4, 64, 64)
                 # features = [torch.randn((4, 32, 64, 64)), torch.randn((4, 64, 32, 32))]
@@ -1039,11 +1002,6 @@ def main():
                 # if our_loss <= 0.0075:
                 #     final_loss += our_loss
                 final_loss = old_loss + our_loss
-                    
-                if torch.isinf(our_loss).any():
-                    raise ValueError("our_loss出现inf")
-                if torch.isnan(our_loss).any():
-                    raise ValueError("our_loss出现nan")
 
                 # Gather the losses across all processes for logging (if we use distributed training).
                 avg_loss = accelerator.gather(final_loss.repeat(args.train_batch_size)).mean()
@@ -1126,15 +1084,6 @@ def main():
                     f" {args.validation_prompt}."
                 )
 
-                # create pipeline
-                '''pipeline = DiffusionPipeline.from_pretrained(
-                    args.pretrained_model_name_or_path,
-                    unet=unwrap_model(unet),
-                    revision=args.revision,
-                    variant=args.variant,
-                    torch_dtype=weight_dtype,
-                    cache_dir=args.cache_dir
-                )'''
                 pipeline = StableDiffusionControlNetPipeline.from_pretrained(
                     args.pretrained_model_name_or_path,
                     unet=unwrap_model(unet),
@@ -1157,21 +1106,6 @@ def main():
                         images.append(
                             pipeline(args.validation_prompt, num_inference_steps=30, generator=generator).images[0]
                         )
-
-                if False:
-                    for tracker in accelerator.trackers:
-                        if tracker.name == "tensorboard":
-                            np_images = np.stack([np.asarray(img) for img in images])
-                            tracker.writer.add_images("validation", np_images, epoch, dataformats="NHWC")
-                        if tracker.name == "wandb":
-                            tracker.log(
-                                {
-                                    "validation": [
-                                        wandb.Image(image, caption=f"{i}: {args.validation_prompt}")
-                                        for i, image in enumerate(images)
-                                    ]
-                                }
-                            )
 
                 del pipeline
                 torch.cuda.empty_cache()
@@ -1212,7 +1146,7 @@ def main():
 
         # Final inference
         # Load previous pipeline
-        if False and args.validation_prompt is not None:
+        if args.validation_prompt is not None:
             pipeline = DiffusionPipeline.from_pretrained(
                 args.pretrained_model_name_or_path,
                 revision=args.revision,

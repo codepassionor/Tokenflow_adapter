@@ -96,12 +96,6 @@ if __name__ == "__main__":
         image_paths_lora = glob.glob(f"./output_lora{opt.begin}/text2video_{prompt.replace(' ','_')}" + "/*.png")
         clip_score = get_clip_score(image_paths, metadata["caption_0"])
         clip_score_lora = get_clip_score(image_paths_lora, metadata["caption_0"])
-        '''
-        fid_value = fid_score.calculate_fid_given_paths([real_images_folder, generated_images_folder],
-                                                batch_size=16, device='cuda', dims=2048)
-        fid_value_lora = fid_score.calculate_fid_given_paths([real_images_folder, generated_images_folder_lora],
-                                                batch_size=16, device='cuda', dims=2048)
-        '''
         lpips_similarity = calc_lpips(image_paths)
         lpips_similarity_lora = calc_lpips(image_paths_lora)
         print(clip_score)

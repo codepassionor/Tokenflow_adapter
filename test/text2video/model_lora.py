@@ -59,7 +59,7 @@ class Model_lora:
         safety_checker = kwargs.pop('safety_checker', None)
         self.pipe = self.pipe_dict[model_type].from_pretrained(
             model_id, safety_checker=safety_checker, **kwargs).to(self.device).to(self.dtype)
-        self.pipe.load_lora_weights("/checkpoint/token/prefix8/pytorch_lora_weights.safetensors")
+        self.pipe.load_lora_weights("/checkpoint/pytorch_lora_weights.safetensors")
         self.pipe.fuse_lora(lora_scale=0.5)
         self.hooker = BFHooker(self.pipe.unet)
         

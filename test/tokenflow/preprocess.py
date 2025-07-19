@@ -39,12 +39,11 @@ class Preprocess(nn.Module):
             print(f'[INFO] using hugging face custom model key: {hf_key}')
             model_key = hf_key
         elif self.sd_version == '2.1':
-            model_key = "/root/autodl-tmp/cache_huggingface/huggingface/hub/models--stabilityai--stable-diffusion-2-1-base"
+            model_key = "stabilityai/stable-diffusion-2-1-base"
         elif self.sd_version == '2.0':
             model_key = "stabilityai/stable-diffusion-2-base"
         elif self.sd_version == '1.5' or self.sd_version == 'ControlNet':
-            #model_key = "runwayml/stable-diffusion-v1-5"
-            model_key = "/root/autodl-fs/models--runwayml--stable-diffusion-v1-5/"
+            model_key = "runwayml/stable-diffusion-v1-5"
         elif self.sd_version == 'depth':
             model_key = "stabilityai/stable-diffusion-2-depth"
         else:
@@ -303,8 +302,7 @@ def prep(opt):
     elif opt.sd_version == '2.0':
         model_key = "stabilityai/stable-diffusion-2-base"
     elif opt.sd_version == '1.5' or opt.sd_version == 'ControlNet':
-        #model_key = "runwayml/stable-diffusion-v1-5"
-        model_key = "/root/autodl-fs/models--runwayml--stable-diffusion-v1-5/"
+        model_key = "runwayml/stable-diffusion-v1-5"
     elif opt.sd_version == 'depth':
         model_key = "stabilityai/stable-diffusion-2-depth"
     toy_scheduler = DDIMScheduler.from_pretrained(model_key, subfolder="scheduler")
