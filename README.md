@@ -1,6 +1,6 @@
 ##
 
-# Enhancing Low-Cost Video Editing with Lightweight Adaptors and Temporal-Aware Inversion
+# A Unified and Lightweight Adapter for Coarse-to-Fine Video Editing via Temporal and Prompt-Adaptive Tuning
 
 ## Getting Started
 1. Clone this repository:
